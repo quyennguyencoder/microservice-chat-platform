@@ -1,0 +1,160 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: postgres
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - zchat_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongodb:
+    image: mongo:8
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: mongo
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - zchat_network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:8
+    container_name: redis
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass redis
+    volumes:
+      - redis_data:/data
+    networks:
+      - zchat_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redis", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kafka:
+    image: confluentinc/cp-kafka:8.2.0
+    container_name: kafka
+    hostname: kafka
+    ports:
+      - "9092:9092"
+      - "9094:9094"
+    environment:
+      - KAFKA_NODE_ID=1
+      - KAFKA_PROCESS_ROLES=broker,controller
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+      - KAFKA_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,PLAINTEXT_HOST://:9094
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9094
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_LOG_DIRS=/var/lib/kafka/data
+      - CLUSTER_ID=MkU3OEVBNTcwNTJENDM2Qk
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
+      - KAFKA_NUM_PARTITIONS=3
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    networks:
+      - zchat_network
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "8090:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - zchat_network
+
+  elasticsearch:
+    image: elasticsearch:9.3.0
+    container_name: elasticsearch
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - ELASTIC_PASSWORD=nguyenquyen
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - zchat_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -u elastic:nguyenquyen http://localhost:9200/_cluster/health | grep -q 'green\\|yellow'"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+  kibana:
+    image: kibana:9.3.0
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=kibana_system_pass  # set riêng qua curl trước khi start
+      - XPACK_FLEET_AGENTLESS_ENABLED=false
+      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=8HJ2YUPPfc9tFKGTn75xwVbwhryL9GVs
+      - XPACK_SECURITY_ENCRYPTIONKEY=iEJent2TwMyy9xt26PoL2oBEqUChxthd
+      - XPACK_REPORTING_ENCRYPTIONKEY=AMyQHG0z2sajxP2Nj9mbbrrCrXzP2tjC
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - zchat_network
+
+volumes:
+  postgres_data:
+  mongodb_data:
+  redis_data:
+  elasticsearch_data:
+  kafka_data:
+
+networks:
+  zchat_network:
+
+# docker compose up -d elasticsearch
+# docker logs elasticsearch
+# docker exec -it elasticsearch bash
+# curl -u elastic:nguyenquyen -X POST "http://localhost:9200/_security/user/kibana_system/_password" -H "Content-Type: application/json" -d '{"password":"nguyenquyen"}'
+# docker compose up -d kibana
+# docker logs kibana
+# http://localhost:5601
+
+# curl -H "Authorization: ApiKey <your-api-key>" http://localhost:9200
+# curl.exe -H "Authorization: ApiKey <your-api-key>" http://localhost:9200
