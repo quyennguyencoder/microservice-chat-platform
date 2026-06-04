@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:17
-    container_name: postgres
+    container_name: zchat-postgres
     ports:
       - "5433:5432"
     environment:
@@ -21,7 +21,7 @@ services:
 
   mongodb:
     image: mongo:8
-    container_name: mongodb
+    container_name: zchat-mongodb
     ports:
       - "27017:27017"
     environment:
@@ -39,7 +39,7 @@ services:
 
   redis:
     image: redis:8
-    container_name: redis
+    container_name: zchat-redis
     ports:
       - "6379:6379"
     command: redis-server --requirepass redis
@@ -55,7 +55,7 @@ services:
 
   kafka:
     image: confluentinc/cp-kafka:8.2.0
-    container_name: kafka
+    container_name: zchat-kafka
     hostname: kafka
     ports:
       - "9092:9092"
@@ -86,7 +86,7 @@ services:
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
-    container_name: kafka-ui
+    container_name: zchat-kafka-ui
     ports:
       - "8090:8080"
     environment:
@@ -100,7 +100,7 @@ services:
 
   elasticsearch:
     image: elasticsearch:9.3.0
-    container_name: elasticsearch
+    container_name: zchat-elasticsearch
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -120,7 +120,7 @@ services:
       retries: 10
 
   kibana:
-    image: kibana:9.3.0
+    image: zchat-kibana:9.3.0
     container_name: kibana
     ports:
       - "5601:5601"
