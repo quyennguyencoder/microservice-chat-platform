@@ -1,0 +1,76 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  codec:
+    max-in-memory-size: 11MB
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: false
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowedOriginPatterns:
+                  - "http://localhost:3000"
+                  - "${FRONTEND_URL:http://localhost:3000}"
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                  - PATCH
+                  - OPTIONS
+                allowedHeaders:
+                  - "*"
+                allowCredentials: true
+                maxAge: 3600
+
+          default-filters:
+            - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin, RETAIN_UNIQUE
+
+          httpclient:
+            connect-timeout: 5000       # 5 seconds to connect
+            response-timeout: 10s       # 10 seconds for full response
+          
+          routes:
+            # ─── Auth Service ─────────────────────────────────────────
+            - id: auth-service
+              uri: lb://AUTH-SERVICE
+              predicates:
+                - Path=/api/auth/**
+
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slowCallDurationThreshold: 8s
+        slowCallRateThreshold: 80
+    instances:
+      auth-service-cb:
+        baseConfig: default
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,gateway,env,configprops
+
+logging:
+  level:
+    com.nguyenquyen: DEBUG
+    org.springframework.cloud.gateway: INFO
+    reactor.netty.http.client: DEBUG
+    io.github.resilience4j: INFO

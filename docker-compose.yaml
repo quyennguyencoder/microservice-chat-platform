@@ -19,23 +19,22 @@ services:
       timeout: 5s
       retries: 5
 
-
   redis:
     image: redis:8
     container_name: zchat-redis
     ports:
       - "6379:6379"
-    command: redis-server --requirepass redis
+#    command: redis-server --requirepass redis
+    command: redis-server --requirepass ${REDIS_PASSWORD:-redis}
     volumes:
       - redis_data:/data
     networks:
       - zchat_network
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "redis", "ping"]
+      test: [ "CMD-SHELL", "redis-cli -a ${REDIS_PASSWORD:-redis} --no-auth-warning ping | grep -q PONG" ]
       interval: 10s
       timeout: 5s
       retries: 5
-
   kafka:
     image: confluentinc/cp-kafka:8.2.0
     container_name: zchat-kafka
@@ -47,7 +46,8 @@ services:
       - KAFKA_NODE_ID=1
       - KAFKA_PROCESS_ROLES=broker,controller
       - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
-      - KAFKA_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,PLAINTEXT_HOST://:9094
+      # Lắng nghe kết nối từ mạng nội bộ Docker và từ máy tính host
+      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,PLAINTEXT_HOST://0.0.0.0:9094
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9094
       - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
@@ -56,7 +56,9 @@ services:
       - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
       - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
       - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
+      # Khởi tạo sẵn 3 partitions cho các topic mới để sát với thực tế
       - KAFKA_NUM_PARTITIONS=3
+      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
     volumes:
       - kafka_data:/var/lib/kafka/data
     networks:
@@ -68,7 +70,7 @@ services:
       retries: 10
 
   kafka-ui:
-    image: provectuslabs/kafka-ui:latest
+    image: provectuslabs/kafka-ui:v0.7.2
     container_name: zchat-kafka-ui
     ports:
       - "8090:8080"
