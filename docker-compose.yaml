@@ -19,23 +19,6 @@ services:
       timeout: 5s
       retries: 5
 
-  mongodb:
-    image: mongo:8
-    container_name: zchat-mongodb
-    ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: mongo
-    volumes:
-      - mongodb_data:/data/db
-    networks:
-      - zchat_network
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   redis:
     image: redis:8
