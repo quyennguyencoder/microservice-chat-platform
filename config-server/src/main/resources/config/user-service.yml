@@ -16,7 +16,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update   # Auto-creates/updates user_profiles table
+      ddl-auto: validate
     show-sql: false
     properties:
       hibernate:
