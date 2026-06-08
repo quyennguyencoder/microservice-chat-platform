@@ -41,7 +41,7 @@ spring:
       timeout: 6000ms
 
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9094}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -70,6 +70,11 @@ spring:
           timeout: 5000
           writetimeout: 5000
 
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
 app:
   jwt:
     expiration: 900000            # Access token: 15 minutes (ms)

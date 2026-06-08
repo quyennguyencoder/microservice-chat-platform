@@ -17,7 +17,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * Auth Service — Core business logic
@@ -264,7 +264,7 @@ public class AuthService {
                 .token(refreshToken)
                 .user(user)
                 .revoked(false)
-                .expiryDate(LocalDateTime.now().plusSeconds(
+                .expiryDate(Instant.now().plusSeconds(
                         jwtService.getRefreshTokenExpirationMs() / 1000))
                 .build();
         refreshTokenRepository.save(refreshTokenEntity);

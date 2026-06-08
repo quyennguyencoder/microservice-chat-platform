@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.6</version>
+        <version>3.5.14</version>
         <relativePath/>
     </parent>
 
@@ -23,6 +23,9 @@
         <module>config-server</module>
         <module>discovery-server</module>
         <module>api-gateway</module>
+        <module>auth-service</module>
+        <module>user-service</module>
+
 
 
     </modules>
@@ -32,9 +35,10 @@
         <maven.compiler.target>25</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <spring-cloud.version>2025.1.1</spring-cloud.version>
+        <spring-cloud.version>2025.0.2</spring-cloud.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
+        <spring-kafka.version>3.3.0</spring-kafka.version>
 
     </properties>
 
@@ -63,7 +67,6 @@
                 <artifactId>mapstruct</artifactId>
                 <version>${mapstruct.version}</version>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 

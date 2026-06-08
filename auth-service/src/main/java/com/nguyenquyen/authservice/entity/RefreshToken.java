@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -35,22 +35,22 @@ public class RefreshToken {
     private User user;
 
     @Column(nullable = false)
-    private LocalDateTime expiryDate;
+    private Instant expiryDate;
 
     @Column(nullable = false)
     @Builder.Default
     private boolean revoked = false;
 
     @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
+        createdAt = Instant.now();
     }
 
     public boolean isExpired() {
-        return LocalDateTime.now().isAfter(expiryDate);
+        return Instant.now().isAfter(expiryDate);
     }
 
     public boolean isValid() {

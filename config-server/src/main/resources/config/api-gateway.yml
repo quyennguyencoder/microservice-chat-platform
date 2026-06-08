@@ -5,8 +5,9 @@ spring:
   application:
     name: api-gateway
 
-  codec:
-    max-in-memory-size: 11MB
+  http:
+    codecs:
+      max-in-memory-size: 16MB   # Increase if you expect large payloads
 
   cloud:
     gateway:
@@ -43,9 +44,24 @@ spring:
           routes:
             # ─── Auth Service ─────────────────────────────────────────
             - id: auth-service
-              uri: lb://AUTH-SERVICE
+              uri: lb://auth-service
               predicates:
                 - Path=/api/auth/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: auth-service-cb
+                    fallbackUri: forward:/fallback/auth-service
+            # ─── User Profile Service ──────────────────────────────────
+            - id: user-service
+              uri: lb://user-service
+              predicates:
+                - Path=/api/users/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: user-service-cb
+                    fallbackUri: forward:/fallback/user-service
 
 
 resilience4j:
@@ -61,7 +77,8 @@ resilience4j:
     instances:
       auth-service-cb:
         baseConfig: default
-
+      user-service-cb:
+        baseConfig: default
 management:
   endpoints:
     web:
