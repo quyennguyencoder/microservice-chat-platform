@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * Kafka Event — Published when a new user completes email verification
@@ -41,5 +41,5 @@ public class UserRegisteredEvent {
     private String email;
     private String name;
     private String phone;
-    private LocalDateTime registeredAt;
+    private Instant registeredAt;
 }
