@@ -47,21 +47,31 @@ spring:
               uri: lb://auth-service
               predicates:
                 - Path=/api/auth/**
-              filters:
-                - name: CircuitBreaker
-                  args:
-                    name: auth-service-cb
-                    fallbackUri: forward:/fallback/auth-service
+#              filters:
+#                - name: CircuitBreaker
+#                  args:
+#                    name: auth-service-cb
+#                    fallbackUri: forward:/fallback/auth-service
             # ─── User Profile Service ──────────────────────────────────
             - id: user-service
               uri: lb://user-service
               predicates:
                 - Path=/api/users/**
-              filters:
-                - name: CircuitBreaker
-                  args:
-                    name: user-service-cb
-                    fallbackUri: forward:/fallback/user-service
+#              filters:
+#                - name: CircuitBreaker
+#                  args:
+#                    name: user-service-cb
+#                    fallbackUri: forward:/fallback/user-service
+          # ─── Contact Service ───────────────────────────────────────
+            - id: contact-service
+              uri: lb://contact-service
+              predicates:
+                - Path=/api/contacts/**
+#              filters:
+#                - name: CircuitBreaker
+#                  args:
+#                    name: contact-service-cb
+#                    fallbackUri: forward:/fallback/contact-service
 
 
 resilience4j:
@@ -78,6 +88,8 @@ resilience4j:
       auth-service-cb:
         baseConfig: default
       user-service-cb:
+        baseConfig: default
+      contact-service-cb:
         baseConfig: default
 management:
   endpoints:
