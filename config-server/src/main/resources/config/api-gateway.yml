@@ -82,7 +82,16 @@ spring:
 #                  args:
 #                    name: conversation-service-cb
 #                    fallbackUri: forward:/fallback/conversation-service
-
+          # ─── Message Service ───────────────────────────────────────
+            - id: message-service
+              uri: lb://message-service
+              predicates:
+                - Path=/api/messages/**
+#              filters:
+#                - name: CircuitBreaker
+#                  args:
+#                    name: message-service-cb
+#                    fallbackUri: forward:/fallback/message-service
 resilience4j:
   circuitbreaker:
     configs:
@@ -101,6 +110,8 @@ resilience4j:
       contact-service-cb:
         baseConfig: default
       conversation-service-cb:
+        baseConfig: default
+      message-service-cb:
         baseConfig: default
 management:
   endpoints:

@@ -1,4 +1,4 @@
-package com.nguyenquyen.contactservice.exception;
+package com.nguyenquyen.messageservice.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -10,9 +10,10 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+
 
 @RestControllerAdvice
 @Slf4j
@@ -35,23 +36,16 @@ public class GlobalExceptionHandler {
                 errorBody(400, "Validation Failed", fieldErrors.toString(), request.getRequestURI()));
     }
 
-    @ExceptionHandler(ContactNotFoundException.class)
+    @ExceptionHandler(MessageNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleNotFound(
-            ContactNotFoundException ex, HttpServletRequest request) {
+            MessageNotFoundException ex, HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                 errorBody(404, "Not Found", ex.getMessage(), request.getRequestURI()));
     }
 
-    @ExceptionHandler(ContactAlreadyExistsException.class)
-    public ResponseEntity<Map<String, Object>> handleConflict(
-            ContactAlreadyExistsException ex, HttpServletRequest request) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(
-                errorBody(409, "Conflict", ex.getMessage(), request.getRequestURI()));
-    }
-
-    @ExceptionHandler(ContactAccessDeniedException.class)
+    @ExceptionHandler(MessageAccessDeniedException.class)
     public ResponseEntity<Map<String, Object>> handleAccessDenied(
-            ContactAccessDeniedException ex, HttpServletRequest request) {
+            MessageAccessDeniedException ex, HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                 errorBody(403, "Forbidden", ex.getMessage(), request.getRequestURI()));
     }
@@ -73,7 +67,7 @@ public class GlobalExceptionHandler {
 
     private Map<String, Object> errorBody(int status, String error, String message, String path) {
         Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", Instant.now().toString());
+        body.put("timestamp", LocalDateTime.now().toString());
         body.put("status", status);
         body.put("error", error);
         body.put("message", message);
