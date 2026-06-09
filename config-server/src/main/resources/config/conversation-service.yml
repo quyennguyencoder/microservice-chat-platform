@@ -1,12 +1,12 @@
 server:
-  port: 8082
+  port: 8084
 
 spring:
   application:
-    name: user-service
+    name: conversation-service
 
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${USER_DB_NAME:user_db}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${CONVERSATION_DB_NAME:conversation_db}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
@@ -36,7 +36,7 @@ spring:
   # ─── Redis (for profile caching) ─────────────────────────
   data:
     cache:
-       type: redis
+      type: redis
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
@@ -45,16 +45,14 @@ spring:
 
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9094}
-#    bootstrap-servers: localhost:9092
-    consumer:
-      group-id: user-service
-      auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        spring.json.trusted.packages: "com.nguyenquyen.userservice.event,com.nguyenquyen.authservice.event"
-        spring.json.use.type.headers: false
-        spring.json.value.default.type: com.nguyenquyen.userservice.event.UserRegisteredEvent
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+#    consumer:
+#      group-id: conversation-service
+#      auto-offset-reset: earliest
+#      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
 
   jackson:
     serialization:
