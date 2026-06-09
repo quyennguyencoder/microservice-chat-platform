@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,5 +45,5 @@ public class GroupEvent {
     /** The affected user — only for MEMBER_ADDED / MEMBER_REMOVED. */
     private UUID userId;
 
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 }

@@ -3,7 +3,7 @@ package com.nguyenquyen.conversationservice.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -37,10 +37,10 @@ public class GroupMember {
     private GroupRole role;
 
     @Column(name = "joined_at", nullable = false, updatable = false)
-    private LocalDateTime joinedAt;
+    private Instant joinedAt;
 
     @PrePersist
     private void prePersist() {
-        joinedAt = LocalDateTime.now();
+        joinedAt = Instant.now();
     }
 }

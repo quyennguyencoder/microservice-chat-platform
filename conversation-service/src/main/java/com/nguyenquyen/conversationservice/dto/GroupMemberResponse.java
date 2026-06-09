@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Data
@@ -19,7 +19,7 @@ public class GroupMemberResponse {
     private UUID id;
     private UUID userId;
     private GroupRole role;
-    private LocalDateTime joinedAt;
+    private Instant joinedAt;
 
     public static GroupMemberResponse from(GroupMember member) {
         return GroupMemberResponse.builder()

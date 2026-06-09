@@ -8,17 +8,12 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>message-service</artifactId>
+    <artifactId>status-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>message-service</name>
-    <description>message-service</description>
+    <name>status-service</name>
+    <description>status-service</description>
 
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
@@ -64,6 +59,10 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
     </dependencies>
 

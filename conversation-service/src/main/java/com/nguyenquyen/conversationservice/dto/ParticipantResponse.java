@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 /**
@@ -29,5 +29,5 @@ public class ParticipantResponse {
     private UUID userId;
 
     /** Timestamp when this user joined the chat. */
-    private LocalDateTime joinedAt;
+    private Instant joinedAt;
 }

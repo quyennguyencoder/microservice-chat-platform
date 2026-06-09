@@ -3,7 +3,7 @@ package com.nguyenquyen.conversationservice.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -42,10 +42,10 @@ public class Group {
     private UUID chatId;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL,
                fetch = FetchType.EAGER, orphanRemoval = true)
@@ -54,12 +54,12 @@ public class Group {
 
     @PrePersist
     private void prePersist() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+        createdAt = Instant.now();
+        updatedAt = Instant.now();
     }
 
     @PreUpdate
     private void preUpdate() {
-        updatedAt = LocalDateTime.now();
+        updatedAt = Instant.now();
     }
 }

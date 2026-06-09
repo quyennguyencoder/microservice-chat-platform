@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -69,7 +69,7 @@ public class GlobalExceptionHandler {
 
     private ResponseEntity<ErrorResponse> buildError(HttpStatus status, String message, WebRequest request) {
         ErrorResponse body = new ErrorResponse(
-                LocalDateTime.now(),
+                Instant.now(),
                 status.value(),
                 status.getReasonPhrase(),
                 message,
@@ -79,7 +79,7 @@ public class GlobalExceptionHandler {
     }
 
     public record ErrorResponse(
-            LocalDateTime timestamp,
+            Instant timestamp,
             int status,
             String error,
             String message,

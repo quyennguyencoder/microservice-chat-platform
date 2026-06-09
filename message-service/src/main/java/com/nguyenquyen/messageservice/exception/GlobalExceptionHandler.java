@@ -10,7 +10,7 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -67,7 +67,7 @@ public class GlobalExceptionHandler {
 
     private Map<String, Object> errorBody(int status, String error, String message, String path) {
         Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now().toString());
+        body.put("timestamp", Instant.now().toString());
         body.put("status", status);
         body.put("error", error);
         body.put("message", message);

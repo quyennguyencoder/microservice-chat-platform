@@ -3,7 +3,7 @@ package com.nguyenquyen.conversationservice.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 
@@ -45,10 +45,10 @@ public class ChatParticipant {
 
     /** Timestamp when this user joined the chat. */
     @Column(name = "joined_at", nullable = false, updatable = false)
-    private LocalDateTime joinedAt;
+    private Instant joinedAt;
 
     @PrePersist
     protected void onCreate() {
-        this.joinedAt = LocalDateTime.now();
+        this.joinedAt = Instant.now();
     }
 }

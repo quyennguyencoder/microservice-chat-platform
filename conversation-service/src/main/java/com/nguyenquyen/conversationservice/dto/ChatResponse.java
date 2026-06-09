@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,8 +30,8 @@ public class ChatResponse {
     private List<ParticipantResponse> participants;
 
     /** Timestamp when the chat was created. */
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     /** Timestamp when the chat was last updated. */
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 }
