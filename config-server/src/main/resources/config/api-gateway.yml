@@ -72,7 +72,16 @@ spring:
 #                  args:
 #                    name: contact-service-cb
 #                    fallbackUri: forward:/fallback/contact-service
-
+          # ─── Conversation Service ──────────────────────────────────────────
+            - id: conversation-service
+              uri: lb://conversation-service
+              predicates:
+                - Path=/api/chats/**,/api/groups/**
+#              filters:
+#                - name: CircuitBreaker
+#                  args:
+#                    name: conversation-service-cb
+#                    fallbackUri: forward:/fallback/conversation-service
 
 resilience4j:
   circuitbreaker:
@@ -90,6 +99,8 @@ resilience4j:
       user-service-cb:
         baseConfig: default
       contact-service-cb:
+        baseConfig: default
+      conversation-service-cb:
         baseConfig: default
 management:
   endpoints:

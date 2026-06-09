@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 
@@ -29,8 +29,8 @@ public class ContactResponse {
     private ContactStatus status;
 
     /** Timestamp when the contact request was originally created. */
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     /** Timestamp of the last status change (e.g., when request was accepted). */
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 }

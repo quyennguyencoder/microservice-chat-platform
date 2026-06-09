@@ -45,4 +45,4 @@ management:
 
 logging:
   level:
-    com.bizchat: DEBUG
+    com.nguyenquyen: DEBUG
