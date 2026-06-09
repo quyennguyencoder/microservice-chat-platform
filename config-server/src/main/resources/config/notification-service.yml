@@ -1,12 +1,12 @@
 server:
-  port: 8085
+  port: 8086
 
 spring:
   application:
-    name: message-service
+    name: notification-service
 
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${MESSAGE_DB_NAME:message_db}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${NOTIFICATION_DB_NAME:notification_db}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
@@ -49,10 +49,11 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     consumer:
-      group-id: message-service
+      group-id: notification-service
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#        value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
 
   jackson:
     serialization:

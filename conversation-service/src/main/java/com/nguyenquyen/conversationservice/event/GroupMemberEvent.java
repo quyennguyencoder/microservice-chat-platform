@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
 import java.util.UUID;
 
 /**
@@ -21,4 +22,5 @@ public class GroupMemberEvent {
     private UUID groupId;
     /** Null for GROUP_DELETED events. */
     private UUID userId;
+    private Instant createdAt;
 }

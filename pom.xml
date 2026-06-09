@@ -29,8 +29,6 @@
         <module>conversation-service</module>
         <module>message-service</module>
 
-
-
     </modules>
     <properties>
         <java.version>25</java.version>
