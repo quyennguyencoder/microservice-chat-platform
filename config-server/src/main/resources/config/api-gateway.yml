@@ -103,6 +103,33 @@ spring:
 #                  args:
 #                    name: status-service-cb
 #                    fallbackUri: forward:/fallback/status-service
+          # ─── Notification Service ───────────────────────────────────
+            - id: notification-service
+              uri: lb://notification-service
+              predicates:
+                - Path=/api/notifications/**
+#              filters:
+#                - name: CircuitBreaker
+#                  args:
+#                    name: notification-service-cb
+#                    fallbackUri: forward:/fallback/notification-service
+
+          # ─── Notification Service (WebSocket — future) ─────────────
+          #
+          # CONCEPT: WebSocket Routing
+          # ──────────────────────────
+          # lb:ws:// = Load Balanced WebSocket URI
+          # HTTP:      lb://service-name
+          # WebSocket: lb:ws://service-name  ← "ws" scheme for upgrade
+#            - id: notification-ws
+#              uri: lb:ws://notification-service
+#              predicates:
+#                - Path=/ws/**
+#              filters:
+#                - name: CircuitBreaker
+#                  args:
+#                    name: notification-service-cb
+#                    fallbackUri: forward:/fallback/ws
 resilience4j:
   circuitbreaker:
     configs:
@@ -123,6 +150,10 @@ resilience4j:
       conversation-service-cb:
         baseConfig: default
       message-service-cb:
+        baseConfig: default
+      notification-service-cb:
+        baseConfig: default
+      notification-ws-cb:
         baseConfig: default
       status-service-cb:
         baseConfig: default

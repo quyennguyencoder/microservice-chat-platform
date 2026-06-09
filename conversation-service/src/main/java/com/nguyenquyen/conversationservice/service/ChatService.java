@@ -38,15 +38,6 @@ public class ChatService {
 
     // ─── Create or Get Private Chat ────────────────────────────────────────────
 
-    /**
-     * Creates a new private chat between the authenticated user and a target user.
-     * If a private chat already exists between them, returns the existing one (idempotent).
-     *
-     * @param requesterId authenticated user's UUID (from X-User-Id header)
-     * @param request     contains the targetUserId to chat with
-     * @return existing or newly created chat
-     * @throws IllegalArgumentException if user tries to chat with themselves
-     */
     @Transactional
     public ChatResponse createOrGetPrivateChat(UUID requesterId, CreatePrivateChatRequest request) {
         UUID targetUserId = request.getTargetUserId();
@@ -94,13 +85,6 @@ public class ChatService {
 
     // ─── Create Group Chat ─────────────────────────────────────────────────────
 
-    /**
-     * Creates a GROUP type chat with all provided member IDs as participants.
-     * Called via REST endpoint (service-to-service).
-     *
-     * @param memberIds all group member UUIDs (must include the creator)
-     * @return the newly created GROUP chat
-     */
     @Transactional
     public ChatResponse createGroupChat(List<UUID> memberIds) {
         Chat chat = Chat.builder()

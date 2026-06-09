@@ -16,6 +16,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -284,6 +285,7 @@ public class GroupService {
                 .eventType(eventType)
                 .groupId(groupId)
                 .userId(userId)
+                .createdAt(Instant.now())
                 .build();
         kafkaTemplate.send(GROUP_EVENTS_TOPIC, groupId.toString(), event);
         log.debug("Published {} event for groupId={}, userId={}", eventType, groupId, userId);
