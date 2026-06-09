@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -26,8 +26,8 @@ public class GroupResponse {
     private UUID chatId;
     private int memberCount;
     private List<GroupMemberResponse> members;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private Instant createdAt;
+    private Instant updatedAt;
 
     public static GroupResponse from(Group group) {
         List<GroupMemberResponse> memberResponses = group.getMembers().stream()

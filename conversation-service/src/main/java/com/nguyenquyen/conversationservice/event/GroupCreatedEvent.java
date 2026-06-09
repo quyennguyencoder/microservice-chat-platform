@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,5 +21,5 @@ public class GroupCreatedEvent {
     private String groupName;
     private UUID createdBy;
     private List<UUID> memberIds;
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 }

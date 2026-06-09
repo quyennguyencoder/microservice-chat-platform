@@ -8,7 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 
@@ -37,8 +37,8 @@ public class MessageResponse {
     private MessageStatus status;
 
     /** Timestamp when the message was created. */
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     /** Timestamp when the message was last updated (e.g., status change). */
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 }
