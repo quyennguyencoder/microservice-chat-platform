@@ -8,9 +8,10 @@
         <version>0.0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>common</artifactId>
-    <name>common</name>
-    <description>common</description>
+
+    <artifactId>search-service</artifactId>
+    <name>search-service</name>
+    <description>search-service</description>
 
     <dependencies>
         <dependency>
