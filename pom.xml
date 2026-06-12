@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.14</version>
+        <version>3.5.15</version>
         <relativePath/>
     </parent>
 
@@ -16,31 +16,29 @@
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>zchat</name>
-    <description>ZChat realtime social messaging platform</description>
+    <description>zchat</description>
 
     <modules>
-        <module>common</module>
         <module>config-server</module>
         <module>discovery-server</module>
         <module>api-gateway</module>
-        <module>auth-service</module>
         <module>user-service</module>
-        <module>contact-service</module>
-        <module>conversation-service</module>
-        <module>message-service</module>
-
+        <module>chat-service</module>
+        <module>notification-service</module>
+        <module>search-service</module>
+        <module>storage-service</module>
+        <module>common</module>
     </modules>
     <properties>
-        <java.version>25</java.version>
-        <maven.compiler.source>25</maven.compiler.source>
-        <maven.compiler.target>25</maven.compiler.target>
+        <java.version>21</java.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <spring-cloud.version>2025.0.2</spring-cloud.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
         <spring-kafka.version>3.3.0</spring-kafka.version>
-
     </properties>
 
     <dependencyManagement>
@@ -109,17 +107,6 @@
                                 <groupId>org.projectlombok</groupId>
                                 <artifactId>lombok</artifactId>
                                 <version>${lombok.version}</version>
-                            </path>
-                            <!-- lombok-mapstruct-binding phải đứng giữa lombok và mapstruct -->
-                            <path>
-                                <groupId>org.projectlombok</groupId>
-                                <artifactId>lombok-mapstruct-binding</artifactId>
-                                <version>${lombok-mapstruct-binding.version}</version>
-                            </path>
-                            <path>
-                                <groupId>org.mapstruct</groupId>
-                                <artifactId>mapstruct-processor</artifactId>
-                                <version>${mapstruct.version}</version>
                             </path>
                         </annotationProcessorPaths>
                         <compilerArgs>

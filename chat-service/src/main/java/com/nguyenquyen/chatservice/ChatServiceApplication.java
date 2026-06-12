@@ -1,4 +1,4 @@
-package com.nguyenquyen.notificationservice;
+package com.nguyenquyen.chatservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -7,10 +7,10 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-@ComponentScan(basePackages = {"com.nguyenquyen.common", "com.nguyenquyen.notificationservice"})
-public class NotificationServiceApplication {
+@ComponentScan(basePackages = {"com.nguyenquyen.common", "com.nguyenquyen.chatservice"})
+public class ChatServiceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(NotificationServiceApplication.class, args);
+        SpringApplication.run(ChatServiceApplication.class, args);
     }
 }
