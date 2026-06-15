@@ -1,144 +1,103 @@
+version: '3.8'
+
 services:
   postgres:
     image: postgres:17
-    container_name: zchat-postgres
+    container_name: postgres
     ports:
       - "5433:5432"
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
-    networks:
-      - zchat_network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    restart: unless-stopped
 
   redis:
     image: redis:8
-    container_name: zchat-redis
+    container_name: redis
     ports:
       - "6379:6379"
-    command: redis-server --requirepass ${REDIS_PASSWORD:-redis}
     volumes:
-      - redis_data:/data
-    networks:
-      - zchat_network
-    healthcheck:
-      test: [ "CMD-SHELL", "redis-cli -a ${REDIS_PASSWORD:-redis} --no-auth-warning ping | grep -q PONG" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - redis-data:/data
+    restart: unless-stopped
+
   kafka:
-    image: confluentinc/cp-kafka:8.2.0
-    container_name: zchat-kafka
-    hostname: kafka
+    image: confluentinc/cp-kafka:7.8.0
+    container_name: kafka
     ports:
       - "9092:9092"
-      - "9094:9094"
+      - "9093:9093"
     environment:
-      - KAFKA_NODE_ID=1
-      - KAFKA_PROCESS_ROLES=broker,controller
-      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
-      # Lắng nghe kết nối từ mạng nội bộ Docker và từ máy tính host
-      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,PLAINTEXT_HOST://0.0.0.0:9094
-      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9094
-      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
-      - KAFKA_LOG_DIRS=/var/lib/kafka/data
-      - CLUSTER_ID=MkU3OEVBNTcwNTJENDM2Qk
-      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
-      - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
-      - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
-      # Khởi tạo sẵn 3 partitions cho các topic mới để sát với thực tế
-      - KAFKA_NUM_PARTITIONS=3
-      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
+      KAFKA_LISTENERS: 'PLAINTEXT://kafka:29092,CONTROLLER://kafka:29093,PLAINTEXT_HOST://0.0.0.0:9092'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+      CLUSTER_ID: 'zchat-kafka-cluster-id'
     volumes:
-      - kafka_data:/var/lib/kafka/data
-    networks:
-      - zchat_network
-    healthcheck:
-      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list"]
-      interval: 15s
-      timeout: 10s
-      retries: 10
-
-  kafka-ui:
-    image: provectuslabs/kafka-ui:v0.7.2
-    container_name: zchat-kafka-ui
-    ports:
-      - "8090:8080"
-    environment:
-      - KAFKA_CLUSTERS_0_NAME=local
-      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
-    depends_on:
-      kafka:
-        condition: service_healthy
-    networks:
-      - zchat_network
+      - kafka-data:/var/lib/kafka/data
+    restart: unless-stopped
 
   elasticsearch:
-    image: elasticsearch:9.3.0
-    container_name: zchat-elasticsearch
+    image: elasticsearch:8.15.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ports:
       - "9200:9200"
       - "9300:9300"
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=true
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
-      - ELASTIC_PASSWORD=nguyenquyen
     volumes:
-      - elasticsearch_data:/usr/share/elasticsearch/data
-    networks:
-      - zchat_network
-    healthcheck:
-      test: ["CMD-SHELL", "curl -s -u elastic:nguyenquyen http://localhost:9200/_cluster/health | grep -q 'green\\|yellow'"]
-      interval: 10s
-      timeout: 10s
-      retries: 10
+      - es-data:/usr/share/elasticsearch/data
+    restart: unless-stopped
 
-  kibana:
-    image: zchat-kibana:9.3.0
-    container_name: kibana
-    ports:
-      - "5601:5601"
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    command: server /data --console-address ":9001"
     environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-      - ELASTICSEARCH_USERNAME=kibana_system
-      - ELASTICSEARCH_PASSWORD=kibana_system_pass  # set riêng qua curl trước khi start
-      - XPACK_FLEET_AGENTLESS_ENABLED=false
-      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=8HJ2YUPPfc9tFKGTn75xwVbwhryL9GVs
-      - XPACK_SECURITY_ENCRYPTIONKEY=iEJent2TwMyy9xt26PoL2oBEqUChxthd
-      - XPACK_REPORTING_ENCRYPTIONKEY=AMyQHG0z2sajxP2Nj9mbbrrCrXzP2tjC
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    restart: unless-stopped
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0.0
+    container_name: keycloak
+    command: start-dev --import-realm
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://postgres:5432/keycloak_db
+      - KC_DB_USERNAME=postgres
+      - KC_DB_PASSWORD=postgres
+    ports:
+      - "9090:8080"
     depends_on:
-      elasticsearch:
-        condition: service_healthy
-    networks:
-      - zchat_network
+      - postgres
+    volumes:
+      - ./realm-export.json:/opt/keycloak/data/import/realm.json
+    restart: unless-stopped
 
 volumes:
-  postgres_data:
-  mongodb_data:
-  redis_data:
-  elasticsearch_data:
-  kafka_data:
-
-networks:
-  zchat_network:
-
-# docker compose up -d elasticsearch
-# docker logs elasticsearch
-# docker exec -it elasticsearch bash
-# curl -u elastic:nguyenquyen -X POST "http://localhost:9200/_security/user/kibana_system/_password" -H "Content-Type: application/json" -d '{"password":"nguyenquyen"}'
-# docker compose up -d kibana
-# docker logs kibana
-# http://localhost:5601
-
-# curl -H "Authorization: ApiKey <your-api-key>" http://localhost:9200
-# curl.exe -H "Authorization: ApiKey <your-api-key>" http://localhost:9200
+  postgres-data:
+  redis-data:
+  kafka-data:
+  es-data:
+  minio-data:
