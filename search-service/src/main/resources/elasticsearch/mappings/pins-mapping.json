@@ -1,0 +1,78 @@
+{
+  "properties": {
+    "id": {
+      "type": "keyword"
+    },
+    "title": {
+      "type": "text",
+      "analyzer": "russian_analyzer",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256
+        },
+        "autocomplete": {
+          "type": "text",
+          "analyzer": "autocomplete",
+          "search_analyzer": "autocomplete_search"
+        }
+      }
+    },
+    "description": {
+      "type": "text",
+      "analyzer": "russian_analyzer"
+    },
+    "tags": {
+      "type": "keyword",
+      "fields": {
+        "text": {
+          "type": "text",
+          "analyzer": "russian_analyzer"
+        }
+      }
+    },
+    "authorId": {
+      "type": "keyword"
+    },
+    "authorUsername": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword"
+        }
+      }
+    },
+    "imageId": {
+      "type": "keyword"
+    },
+    "thumbnailId": {
+      "type": "keyword"
+    },
+    "likeCount": {
+      "type": "integer"
+    },
+    "saveCount": {
+      "type": "integer"
+    },
+    "commentCount": {
+      "type": "integer"
+    },
+    "viewCount": {
+      "type": "integer"
+    },
+    "createdAt": {
+      "type": "date",
+      "format": "epoch_millis"
+    },
+    "updatedAt": {
+      "type": "date",
+      "format": "epoch_millis"
+    },
+    "originalWidth": {
+      "type": "integer"
+    },
+    "originalHeight": {
+      "type": "integer"
+    }
+  }
+}
