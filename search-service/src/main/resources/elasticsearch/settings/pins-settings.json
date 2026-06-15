@@ -1,0 +1,64 @@
+{
+  "index": {
+    "number_of_shards": 3,
+    "number_of_replicas": 1,
+    "max_ngram_diff": 18,
+    "analysis": {
+      "analyzer": {
+        "autocomplete": {
+          "type": "custom",
+          "tokenizer": "autocomplete_tokenizer",
+          "filter": ["lowercase", "asciifolding"]
+        },
+        "autocomplete_search": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": ["lowercase", "asciifolding"]
+        },
+        "russian_analyzer": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": ["lowercase", "russian_stop", "russian_stemmer", "asciifolding"]
+        },
+        "russian_search": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": ["lowercase", "russian_stop", "russian_stemmer", "asciifolding", "synonym_filter"]
+        }
+      },
+      "tokenizer": {
+        "autocomplete_tokenizer": {
+          "type": "edge_ngram",
+          "min_gram": 2,
+          "max_gram": 20,
+          "token_chars": ["letter", "digit"]
+        }
+      },
+      "filter": {
+        "russian_stop": {
+          "type": "stop",
+          "stopwords": "_russian_"
+        },
+        "russian_stemmer": {
+          "type": "stemmer",
+          "language": "russian"
+        },
+        "synonym_filter": {
+          "type": "synonym",
+          "synonyms": [
+            "фото, фотография, снимок",
+            "картинка, изображение, пикча",
+            "авто, машина, автомобиль",
+            "красивый, прекрасный, великолепный",
+            "дом, жилище, квартира",
+            "еда, пища, блюдо",
+            "мода, стиль, fashion",
+            "природа, пейзаж, ландшафт",
+            "арт, искусство, творчество",
+            "дизайн, оформление"
+          ]
+        }
+      }
+    }
+  }
+}
