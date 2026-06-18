@@ -1,4 +1,8 @@
 spring:
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
   elasticsearch:
     uris: ${ELASTICSEARCH_URI:http://localhost:9200}
     username: ${ELASTICSEARCH_USERNAME:}
@@ -56,3 +60,12 @@ management:
   health:
     elasticsearch:
       enabled: false
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import java.util.List;
 import java.util.UUID;
 
-@FeignClient(name = "chat-service")
+@FeignClient(name = "chat-service", fallbackFactory = ChatServiceClientFallbackFactory.class)
 public interface ChatServiceClient {
 
     @GetMapping("/api/v1/chats/{chatId}")
