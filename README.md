@@ -1,6 +1,6 @@
 # ZChat - Microservices Chat Platform
 
-ZChat là một nền tảng nhắn tin thời gian thực được xây dựng theo kiến trúc **Microservices**, sử dụng **Spring Boot 3** ở backend và **React 19 / Vite** ở frontend. Hệ thống được thiết kế để đảm bảo tính mở rộng, hiệu năng cao và dễ dàng bảo trì.
+ZChat là một nền tảng nhắn tin thời gian thực được xây dựng theo kiến trúc **Microservices**, sử dụng **Spring Boot 3** ở backend. Hệ thống được thiết kế để đảm bảo tính mở rộng, hiệu năng cao và dễ dàng bảo trì.
 
 ## 🌟 Tính năng chính
 
@@ -28,15 +28,7 @@ Hệ thống bao gồm các thành phần chính sau:
 - **`notification-service`**: Xử lý và gửi thông báo qua email hoặc socket dựa trên event Kafka.
 - **`common`**: Thư viện dùng chung (DTOs, Utils, Exceptions) cho các service.
 
-### 2. Frontend (`zchat-client`)
-- **Framework**: React 19, Vite, TypeScript.
-- **Routing**: React Router DOM.
-- **Quản lý State**: Zustand, TanStack React Query.
-- **Xác thực**: Keycloak JS (`@react-keycloak/web`).
-- **UI/UX**: Gestalt (Pinterest Design System), Tailwind CSS.
-- **Real-time**: StompJS cho kết nối WebSocket.
-
-### 3. Cơ sở hạ tầng (Infrastructure)
+### 2. Cơ sở hạ tầng (Infrastructure)
 Các dịch vụ hạ tầng được triển khai qua Docker Compose:
 - **PostgreSQL 17**: Cơ sở dữ liệu quan hệ cho User, Chat, Keycloak.
 - **Redis 8**: Caching hệ thống.
@@ -51,7 +43,6 @@ Các dịch vụ hạ tầng được triển khai qua Docker Compose:
 
 ### Yêu cầu hệ thống (Prerequisites)
 - **Java 21**
-- **Node.js** (v18+)
 - **Docker & Docker Compose**
 - **Maven**
 
@@ -76,21 +67,10 @@ Bạn có thể chạy các service này thông qua IDE (IntelliJ IDEA) hoặc d
 mvn spring-boot:run -pl <tên-module>
 ```
 
-### 3. Khởi động Frontend (`zchat-client`)
-Di chuyển vào thư mục `zchat-client` và cài đặt thư viện:
-
-```bash
-cd zchat-client
-npm install
-# Khởi chạy server phát triển (Development)
-npm run dev
-```
-
 ---
 
 ## 📚 Thông tin truy cập nội bộ (Local)
 
-- **Frontend**: http://localhost:5173
 - **Eureka Dashboard**: http://localhost:8761
 - **API Gateway**: http://localhost:8080
 - **Keycloak Admin Console**: http://localhost:9090 (admin / admin)
@@ -105,11 +85,6 @@ npm run dev
 - Java 21, Spring Boot 3.5.x, Spring Cloud 2025.0.x
 - Spring Security, OAuth2 Resource Server
 - Spring Data JPA, Hibernate, MapStruct, Lombok
-
-**Frontend:**
-- React 19, TypeScript
-- Zustand, React Query, React Hook Form
-- Axios, WebSocket (StompJS)
 
 **DevOps & Infrastructure:**
 - Docker, Docker Compose
