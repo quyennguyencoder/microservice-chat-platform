@@ -37,8 +37,6 @@ public class UserDocument {
     @Field(type = FieldType.Keyword)
     private String bannerImageId;
 
-    // Removed counters
-
     @Field(type = FieldType.Date, format = DateFormat.epoch_millis)
     private Instant createdAt;
 

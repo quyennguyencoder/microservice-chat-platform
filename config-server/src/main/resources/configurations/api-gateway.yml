@@ -11,11 +11,21 @@ spring:
           uri: lb://USER-SERVICE
           predicates:
             - Path=/api/v1/users/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: gatewayCB
+                fallbackUri: forward:/fallback/general
 
         - id: friends-service-route
           uri: lb://USER-SERVICE
           predicates:
             - Path=/api/v1/friends/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: gatewayCB
+                fallbackUri: forward:/fallback/general
 
         - id: user-service-swagger
           uri: lb://USER-SERVICE
@@ -33,11 +43,21 @@ spring:
           uri: lb://CHAT-SERVICE
           predicates:
             - Path=/api/v1/presence/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: gatewayCB
+                fallbackUri: forward:/fallback/general
 
         - id: chat-service-route
           uri: lb://CHAT-SERVICE
           predicates:
             - Path=/api/v1/chats/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: gatewayCB
+                fallbackUri: forward:/fallback/general
 
         - id: chat-websocket-route
           uri: lb://CHAT-SERVICE
@@ -62,6 +82,11 @@ spring:
           uri: lb://NOTIFICATION-SERVICE
           predicates:
             - Path=/api/v1/notifications/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: gatewayCB
+                fallbackUri: forward:/fallback/general
 
         - id: notification-service-swagger
           uri: lb://NOTIFICATION-SERVICE
@@ -75,6 +100,11 @@ spring:
           uri: lb://SEARCH-SERVICE
           predicates:
             - Path=/api/v1/search/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: gatewayCB
+                fallbackUri: forward:/fallback/general
 
         - id: search-service-swagger
           uri: lb://SEARCH-SERVICE
@@ -86,6 +116,11 @@ spring:
           uri: lb://STORAGE-SERVICE
           predicates:
             - Path=/api/v1/images/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: gatewayCB
+                fallbackUri: forward:/fallback/general
 
         - id: storage-service-swagger
           uri: lb://STORAGE-SERVICE
@@ -142,3 +177,22 @@ springdoc:
 
 server:
   port: 8222
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10000
+        permittedNumberOfCallsInHalfOpenState: 3
+    instances:
+      gatewayCB:
+        baseConfig: default
+  timelimiter:
+    configs:
+      default:
+        timeoutDuration: 5s
+    instances:
+      gatewayCB:
+        baseConfig: default

@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
 
-@FeignClient(name = "user-service", contextId = "userServiceClient")
+@FeignClient(name = "user-service", contextId = "userServiceClient", fallbackFactory = UserServiceClientFallbackFactory.class)
 public interface UserServiceClient {
 
     @GetMapping("/api/v1/friends")

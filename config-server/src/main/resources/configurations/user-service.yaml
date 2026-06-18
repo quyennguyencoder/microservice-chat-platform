@@ -1,4 +1,8 @@
 spring:
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${USER_DB_NAME:users_db}
     username: ${DB_USER:postgres}
@@ -35,3 +39,12 @@ services:
 
 server:
   port: 8010
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
