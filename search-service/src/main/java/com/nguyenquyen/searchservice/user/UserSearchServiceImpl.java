@@ -13,14 +13,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.nguyenquyen.searchservice.exception.IndexingException;
 import com.nguyenquyen.searchservice.exception.SearchException;
+import com.nguyenquyen.searchservice.kafka.event.UserEvent;
 import com.nguyenquyen.searchservice.search.SearchCriteria;
 import com.nguyenquyen.searchservice.search.SearchResult;
 import com.nguyenquyen.searchservice.search.SearchResultBuilder;
 import com.nguyenquyen.searchservice.util.SecurityUtils;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +50,120 @@ public class UserSearchServiceImpl implements UserSearchService {
 
     @Value("${search.fuzzy.prefix-length:2}")
     private int fuzzyPrefixLength;
+
+    @Override
+    public void indexUser(UserEvent event) {
+        try {
+            UserDocument document = mapToDocument(event);
+            elasticsearchClient.index(i -> i
+                    .index(usersIndex)
+                    .id(document.getId())
+                    .document(document)
+            );
+            log.info("User indexed: id={}, username={}", document.getId(), document.getUsername());
+        } catch (Exception e) {
+            log.error("Failed to index user: {}", event.getUserId(), e);
+            throw new IndexingException("Failed to index user: " + event.getUserId(), e);
+        }
+    }
+
+    @Override
+    public void updateUser(UserEvent event) {
+        try {
+            String userId = event.getUserId();
+            Optional<UserDocument> existingOpt = findById(userId);
+
+            if (existingOpt.isEmpty()) {
+                log.warn("User not found for update, indexing as new: {}", userId);
+                indexUser(event);
+                return;
+            }
+
+            UserDocument existing = existingOpt.get();
+            updateDocumentFromEvent(existing, event);
+            existing.setUpdatedAt(Instant.now());
+
+            elasticsearchClient.index(i -> i
+                    .index(usersIndex)
+                    .id(existing.getId())
+                    .document(existing)
+            );
+            log.info("User updated: id={}", userId);
+
+        } catch (Exception e) {
+            log.error("Failed to update user: {}", event.getUserId(), e);
+            throw new IndexingException("Failed to update user: " + event.getUserId(), e);
+        }
+    }
+
+    @Override
+    public void deleteUser(String userId) {
+        try {
+            elasticsearchClient.delete(d -> d
+                    .index(usersIndex)
+                    .id(userId)
+            );
+            log.info("User deleted from index: {}", userId);
+        } catch (Exception e) {
+            log.error("Failed to delete user: {}", userId, e);
+            throw new IndexingException("Failed to delete user: " + userId, e);
+        }
+    }
+
+    @Override
+    public Optional<UserDocument> findById(String userId) {
+        try {
+            co.elastic.clients.elasticsearch.core.GetResponse<UserDocument> response = 
+                elasticsearchClient.get(g -> g.index(usersIndex).id(userId), UserDocument.class);
+            if (response.found()) {
+                return Optional.ofNullable(response.source());
+            }
+            return Optional.empty();
+        } catch (Exception e) {
+            log.error("Failed to find user by id: {}", userId, e);
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public long count() {
+        try {
+            co.elastic.clients.elasticsearch.core.CountResponse response = 
+                elasticsearchClient.count(c -> c.index(usersIndex));
+            return response.count();
+        } catch (Exception e) {
+            log.error("Failed to count users", e);
+            return 0;
+        }
+    }
+
+    private UserDocument mapToDocument(UserEvent event) {
+        return UserDocument.builder()
+                .id(event.getUserId())
+                .username(event.getUsername())
+                .email(event.getEmail())
+                .description(event.getDescription())
+                .imageId(event.getImageId())
+                .bannerImageId(event.getBannerImageId())
+                .createdAt(event.getTimestamp())
+                .updatedAt(Instant.now())
+                .build();
+    }
+
+    private void updateDocumentFromEvent(UserDocument document, UserEvent event) {
+        if (event.getUsername() != null) {
+            document.setUsername(event.getUsername());
+        }
+        if (event.getDescription() != null) {
+            document.setDescription(event.getDescription());
+        }
+        if (event.getImageId() != null) {
+            document.setImageId(event.getImageId());
+        }
+        if (event.getBannerImageId() != null) {
+            document.setBannerImageId(event.getBannerImageId());
+        }
+    }
 
     @Override
     public SearchResult<UserSearchResult> searchUsers(SearchCriteria criteria) {
