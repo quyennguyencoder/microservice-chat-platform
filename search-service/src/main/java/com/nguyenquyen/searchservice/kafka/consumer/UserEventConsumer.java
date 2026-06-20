@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-import com.nguyenquyen.searchservice.user.UserIndexService;
+import com.nguyenquyen.searchservice.user.UserSearchService;
 import com.nguyenquyen.searchservice.kafka.event.UserEvent;
 
 @Component
@@ -12,7 +12,7 @@ import com.nguyenquyen.searchservice.kafka.event.UserEvent;
 @Slf4j
 public class UserEventConsumer {
 
-    private final UserIndexService userIndexService;
+    private final UserSearchService userSearchService;
 
     @KafkaListener(
             topics = "${kafka.topics.user-events:user-events}",
@@ -24,9 +24,9 @@ public class UserEventConsumer {
 
         try {
             switch (event.getType()) {
-                case "USER_CREATED" -> userIndexService.indexUser(event);
-                case "USER_UPDATED" -> userIndexService.updateUser(event);
-                case "USER_DELETED" -> userIndexService.deleteUser(event.getUserId());
+                case "USER_CREATED" -> userSearchService.indexUser(event);
+                case "USER_UPDATED" -> userSearchService.updateUser(event);
+                case "USER_DELETED" -> userSearchService.deleteUser(event.getUserId());
 
                 default -> log.debug("Ignoring user event type: {}", event.getType());
             }

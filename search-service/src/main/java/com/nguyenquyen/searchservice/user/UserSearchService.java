@@ -2,8 +2,21 @@ package com.nguyenquyen.searchservice.user;
 
 import com.nguyenquyen.searchservice.search.SearchCriteria;
 import com.nguyenquyen.searchservice.search.SearchResult;
+import com.nguyenquyen.searchservice.kafka.event.UserEvent;
+
+import java.util.Optional;
 
 public interface UserSearchService {
+
+    void indexUser(UserEvent event);
+
+    void updateUser(UserEvent event);
+
+    void deleteUser(String userId);
+
+    Optional<UserDocument> findById(String userId);
+
+    long count();
 
     SearchResult<UserSearchResult> searchUsers(SearchCriteria criteria);
 
