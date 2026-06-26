@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import com.nguyenquyen.common.kafka.event.ChatEvent;
+import com.nguyenquyen.common.kafka.event.ChatEventType;
 import com.nguyenquyen.notificationservice.notification.NotificationService;
 import java.util.Set;
 
@@ -30,11 +31,15 @@ public class ChatEventConsumer {
                 return;
             }
 
-            if (Set.of("NEW_MESSAGE", "GROUP_CREATED", "MEMBER_ADDED", "MEMBER_REMOVED").contains(event.getType())) {
+            ChatEventType type = ChatEventType.valueOf(event.getType());
+            if (Set.of(ChatEventType.NEW_MESSAGE, ChatEventType.GROUP_CREATED, ChatEventType.MEMBER_ADDED, ChatEventType.MEMBER_REMOVED).contains(type)) {
                 notificationService.createAndSendNotification(event);
             }
+        } catch (IllegalArgumentException e) {
+            log.warn("Unknown chat event type: {}", event.getType());
         } catch (Exception e) {
             log.error("Error processing chat event", e);
+            throw new RuntimeException("Re-throwing exception to trigger Kafka retry / DLQ", e);
         }
     }
 }

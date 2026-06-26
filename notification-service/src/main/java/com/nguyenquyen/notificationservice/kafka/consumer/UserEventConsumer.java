@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import com.nguyenquyen.common.kafka.event.UserEvent;
+import com.nguyenquyen.common.kafka.event.UserEventType;
 import com.nguyenquyen.notificationservice.notification.NotificationService;
 
 @Component
@@ -24,13 +25,17 @@ public class UserEventConsumer {
                 event.getType(), event.getActorId(), event.getRecipientId());
 
         try {
-            if ("FRIEND_REQUEST".equals(event.getType()) || "FRIEND_ACCEPTED".equals(event.getType())) {
+            UserEventType type = UserEventType.valueOf(event.getType());
+            if (type == UserEventType.FRIEND_REQUEST || type == UserEventType.FRIEND_ACCEPTED) {
                 notificationService.createAndSendNotification(event);
             } else {
-                log.debug("Skipping user event not meant for notifications: {}", event.getType());
+                log.debug("Skipping user event not meant for notifications: {}", type);
             }
+        } catch (IllegalArgumentException e) {
+            log.warn("Unknown user event type: {}", event.getType());
         } catch (Exception e) {
             log.error("Error processing user event", e);
+            throw new RuntimeException("Re-throwing exception to trigger Kafka retry / DLQ", e);
         }
     }
 }

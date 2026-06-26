@@ -6,6 +6,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import com.nguyenquyen.searchservice.user.UserSearchService;
 import com.nguyenquyen.common.kafka.event.UserEvent;
+import com.nguyenquyen.common.kafka.event.UserEventType;
 
 @Component
 @RequiredArgsConstructor
@@ -23,16 +24,19 @@ public class UserEventConsumer {
         log.info("Received user event: type={}, userId={}", event.getType(), event.getUserId());
 
         try {
-            switch (event.getType()) {
-                case "USER_CREATED" -> userSearchService.indexUser(event);
-                case "USER_UPDATED" -> userSearchService.updateUser(event);
-                case "USER_DELETED" -> userSearchService.deleteUser(event.getUserId());
-
-                default -> log.debug("Ignoring user event type: {}", event.getType());
+            UserEventType type = UserEventType.valueOf(event.getType());
+            switch (type) {
+                case USER_CREATED -> userSearchService.indexUser(event);
+                case USER_UPDATED -> userSearchService.updateUser(event);
+                case USER_DELETED -> userSearchService.deleteUser(event.getUserId());
+                default -> log.debug("Ignoring user event type: {}", type);
             }
+        } catch (IllegalArgumentException e) {
+            log.warn("Unknown user event type: {}", event.getType());
         } catch (Exception e) {
             log.error("Error processing user event: type={}, userId={}",
                     event.getType(), event.getUserId(), e);
+            throw new RuntimeException("Re-throwing exception to trigger Kafka retry / DLQ", e);
         }
     }
 }
