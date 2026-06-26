@@ -38,6 +38,7 @@ public class ChatEventConsumer {
             log.warn("Unknown chat event type: {}", event.getType());
         } catch (Exception e) {
             log.error("Error processing chat event", e);
+            throw new RuntimeException("Re-throwing exception to trigger Kafka retry / DLQ", e);
         }
     }
 
