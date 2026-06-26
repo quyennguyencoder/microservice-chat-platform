@@ -15,11 +15,11 @@ import org.springframework.stereotype.Service;
 
 import com.nguyenquyen.searchservice.exception.IndexingException;
 import com.nguyenquyen.searchservice.exception.SearchException;
-import com.nguyenquyen.searchservice.kafka.event.UserEvent;
+import com.nguyenquyen.common.kafka.event.UserEvent;
 import com.nguyenquyen.searchservice.search.SearchCriteria;
 import com.nguyenquyen.searchservice.search.SearchResult;
 import com.nguyenquyen.searchservice.search.SearchResultBuilder;
-import com.nguyenquyen.searchservice.util.SecurityUtils;
+import com.nguyenquyen.common.util.SecurityUtils;
 
 import java.io.IOException;
 import java.time.Instant;

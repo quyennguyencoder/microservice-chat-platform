@@ -8,13 +8,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.nguyenquyen.notificationservice.counter.UnreadCounterService;
-import com.nguyenquyen.notificationservice.exception.ResourceNotFoundException;
-import com.nguyenquyen.notificationservice.kafka.event.BaseEvent;
-import com.nguyenquyen.notificationservice.kafka.event.ChatEvent;
+import com.nguyenquyen.common.exception.ResourceNotFoundException;
+import com.nguyenquyen.common.kafka.event.BaseEvent;
+import com.nguyenquyen.common.kafka.event.ChatEvent;
 
 import com.nguyenquyen.notificationservice.sse.SseEmitterManager;
 import com.nguyenquyen.notificationservice.sse.SseEvent;
-import com.nguyenquyen.notificationservice.util.SecurityUtils;
+import com.nguyenquyen.common.util.SecurityUtils;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;

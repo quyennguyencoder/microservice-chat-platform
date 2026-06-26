@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-import com.nguyenquyen.notificationservice.kafka.event.UserEvent;
+import com.nguyenquyen.common.kafka.event.UserEvent;
 import com.nguyenquyen.notificationservice.notification.NotificationService;
 
 @Component
@@ -17,7 +17,7 @@ public class UserEventConsumer {
     @KafkaListener(
             topics = "${kafka.topics.user-events:user-events}",
             groupId = "notification-service",
-            properties = {"spring.json.value.default.type=com.nguyenquyen.notificationservice.kafka.event.UserEvent"}
+            properties = {"spring.json.value.default.type=com.nguyenquyen.common.kafka.event.UserEvent"}
     )
     public void consume(UserEvent event) {
         log.info("Received user event: type={}, actor={}, recipient={}",

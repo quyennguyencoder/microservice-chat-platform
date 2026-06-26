@@ -1,4 +1,4 @@
-package com.nguyenquyen.notificationservice.util;
+package com.nguyenquyen.common.util;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
@@ -6,7 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
-import com.nguyenquyen.notificationservice.exception.UnauthorizedException;
+import com.nguyenquyen.common.exception.UnauthorizedException;
 
 import java.util.*;
 
@@ -23,6 +23,7 @@ public class SecurityUtils {
                 .orElseThrow(() -> new UnauthorizedException("Authentication required"));
     }
 
+    @SuppressWarnings("unchecked")
     public Set<String> getCurrentUserRoles() {
         return getJwt()
                 .map(jwt -> {

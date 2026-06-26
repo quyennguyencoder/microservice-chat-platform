@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import com.nguyenquyen.searchservice.user.UserSearchService;
-import com.nguyenquyen.searchservice.kafka.event.UserEvent;
+import com.nguyenquyen.common.kafka.event.UserEvent;
 
 @Component
 @RequiredArgsConstructor
@@ -17,7 +17,7 @@ public class UserEventConsumer {
     @KafkaListener(
             topics = "${kafka.topics.user-events:user-events}",
             groupId = "search-service",
-            properties = {"spring.json.value.default.type=com.nguyenquyen.searchservice.kafka.event.UserEvent"}
+            properties = {"spring.json.value.default.type=com.nguyenquyen.common.kafka.event.UserEvent"}
     )
     public void consume(UserEvent event) {
         log.info("Received user event: type={}, userId={}", event.getType(), event.getUserId());

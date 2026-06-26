@@ -1,6 +1,8 @@
 package com.nguyenquyen.userservice.exception;
 
-public class UserNotFoundException extends RuntimeException {
+import com.nguyenquyen.common.exception.ResourceNotFoundException;
+
+public class UserNotFoundException extends ResourceNotFoundException {
     public UserNotFoundException(String message) {
         super(message);
     }

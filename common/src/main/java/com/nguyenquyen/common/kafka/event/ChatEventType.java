@@ -1,4 +1,4 @@
-package com.nguyenquyen.chatservice.kafka;
+package com.nguyenquyen.common.kafka.event;
 
 public enum ChatEventType {
     NEW_MESSAGE,
@@ -8,5 +8,7 @@ public enum ChatEventType {
     GROUP_CREATED,
     GROUP_UPDATED,
     MEMBER_ADDED,
-    MEMBER_REMOVED
+    MEMBER_REMOVED,
+    MESSAGE_UPDATED,
+    MESSAGE_DELETED
 }

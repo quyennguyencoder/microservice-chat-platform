@@ -2,7 +2,7 @@ package com.nguyenquyen.searchservice.user;
 
 import com.nguyenquyen.searchservice.search.SearchCriteria;
 import com.nguyenquyen.searchservice.search.SearchResult;
-import com.nguyenquyen.searchservice.kafka.event.UserEvent;
+import com.nguyenquyen.common.kafka.event.UserEvent;
 
 import java.util.Optional;
 

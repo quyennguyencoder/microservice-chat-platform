@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
+import com.nguyenquyen.common.kafka.event.ChatEvent;
 
 import java.util.concurrent.CompletableFuture;
 

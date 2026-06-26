@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.nguyenquyen.searchservice.history.SearchHistoryService;
-import com.nguyenquyen.searchservice.util.SecurityUtils;
+import com.nguyenquyen.common.util.SecurityUtils;
 
 import java.util.List;
 import java.util.Map;

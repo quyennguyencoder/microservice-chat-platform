@@ -1,4 +1,4 @@
-package com.nguyenquyen.userservice.kafka;
+package com.nguyenquyen.common.kafka.event;
 
 public enum UserEventType {
     USER_CREATED,

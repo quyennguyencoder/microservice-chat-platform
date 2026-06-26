@@ -9,11 +9,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.nguyenquyen.chatservice.chat.Chat;
 import com.nguyenquyen.chatservice.chat.ChatService;
-import com.nguyenquyen.chatservice.kafka.ChatEvent;
+import com.nguyenquyen.common.kafka.event.ChatEvent;
 import com.nguyenquyen.chatservice.kafka.ChatEventPublisher;
-import com.nguyenquyen.chatservice.kafka.ChatEventType;
+import com.nguyenquyen.common.kafka.event.ChatEventType;
 import com.nguyenquyen.chatservice.presence.PresenceService;
-import com.nguyenquyen.chatservice.util.SecurityUtils;
+import com.nguyenquyen.common.util.SecurityUtils;
 
 import java.util.List;
 import java.util.UUID;
