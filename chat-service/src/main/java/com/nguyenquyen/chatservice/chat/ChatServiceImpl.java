@@ -6,9 +6,9 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import com.nguyenquyen.chatservice.exception.BadRequestException;
-import com.nguyenquyen.chatservice.exception.ResourceNotFoundException;
-import com.nguyenquyen.chatservice.util.SecurityUtils;
+import com.nguyenquyen.common.exception.BadRequestException;
+import com.nguyenquyen.common.exception.ResourceNotFoundException;
+import com.nguyenquyen.common.util.SecurityUtils;
 import com.nguyenquyen.chatservice.websocket.WsOutgoingMessage;
 
 import java.time.Instant;
@@ -87,8 +87,8 @@ public class ChatServiceImpl implements ChatService {
 
         for (String memberId : request.memberIds()) {
             if (!memberId.equals(currentUserId)) {
-                eventPublisher.publish(com.nguyenquyen.chatservice.kafka.ChatEvent.builder()
-                        .type(com.nguyenquyen.chatservice.kafka.ChatEventType.GROUP_CREATED.name())
+                eventPublisher.publish(com.nguyenquyen.common.kafka.event.ChatEvent.builder()
+                        .type(com.nguyenquyen.common.kafka.event.ChatEventType.GROUP_CREATED.name())
                         .chatId(savedChat.getId())
                         .actorId(currentUserId)
                         .recipientId(memberId)
@@ -136,8 +136,8 @@ public class ChatServiceImpl implements ChatService {
         // Publish to Kafka (for offline notifications)
         chat.getMemberIds().forEach(memberId -> {
             if (!memberId.equals(currentUserId)) {
-                eventPublisher.publish(com.nguyenquyen.chatservice.kafka.ChatEvent.builder()
-                        .type(com.nguyenquyen.chatservice.kafka.ChatEventType.GROUP_UPDATED.name())
+                eventPublisher.publish(com.nguyenquyen.common.kafka.event.ChatEvent.builder()
+                        .type(com.nguyenquyen.common.kafka.event.ChatEventType.GROUP_UPDATED.name())
                         .chatId(chatId)
                         .actorId(currentUserId)
                         .recipientId(memberId)
@@ -177,8 +177,8 @@ public class ChatServiceImpl implements ChatService {
         chat = chatRepository.save(chat);
 
         for (String memberId : request.memberIds()) {
-            eventPublisher.publish(com.nguyenquyen.chatservice.kafka.ChatEvent.builder()
-                    .type(com.nguyenquyen.chatservice.kafka.ChatEventType.MEMBER_ADDED.name())
+            eventPublisher.publish(com.nguyenquyen.common.kafka.event.ChatEvent.builder()
+                    .type(com.nguyenquyen.common.kafka.event.ChatEventType.MEMBER_ADDED.name())
                     .chatId(chatId)
                     .actorId(currentUserId)
                     .recipientId(memberId)
@@ -220,8 +220,8 @@ public class ChatServiceImpl implements ChatService {
         chat.getMembers().remove(memberToRemove);
         chatRepository.save(chat);
 
-        eventPublisher.publish(com.nguyenquyen.chatservice.kafka.ChatEvent.builder()
-                .type(com.nguyenquyen.chatservice.kafka.ChatEventType.MEMBER_REMOVED.name())
+        eventPublisher.publish(com.nguyenquyen.common.kafka.event.ChatEvent.builder()
+                .type(com.nguyenquyen.common.kafka.event.ChatEventType.MEMBER_REMOVED.name())
                 .chatId(chatId)
                 .actorId(currentUserId)
                 .recipientId(memberId)
@@ -271,8 +271,8 @@ public class ChatServiceImpl implements ChatService {
         });
 
         // Publish to Kafka
-        eventPublisher.publish(com.nguyenquyen.chatservice.kafka.ChatEvent.builder()
-                .type(com.nguyenquyen.chatservice.kafka.ChatEventType.GROUP_UPDATED.name())
+        eventPublisher.publish(com.nguyenquyen.common.kafka.event.ChatEvent.builder()
+                .type(com.nguyenquyen.common.kafka.event.ChatEventType.GROUP_UPDATED.name())
                 .chatId(chatId)
                 .actorId(currentUserId)
                 .recipientId(targetUserId)

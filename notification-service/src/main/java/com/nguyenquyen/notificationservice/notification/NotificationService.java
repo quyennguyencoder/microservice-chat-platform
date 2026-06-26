@@ -2,7 +2,7 @@ package com.nguyenquyen.notificationservice.notification;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import com.nguyenquyen.notificationservice.kafka.event.BaseEvent;
+import com.nguyenquyen.common.kafka.event.BaseEvent;
 
 import java.util.List;
 import java.util.UUID;

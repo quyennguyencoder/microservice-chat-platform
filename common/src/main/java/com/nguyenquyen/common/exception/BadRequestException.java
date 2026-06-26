@@ -1,4 +1,4 @@
-package com.nguyenquyen.chatservice.exception;
+package com.nguyenquyen.common.exception;
 
 public class BadRequestException extends RuntimeException {
     public BadRequestException(String message) {

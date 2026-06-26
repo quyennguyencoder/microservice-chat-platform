@@ -1,4 +1,4 @@
-package com.nguyenquyen.chatservice.kafka;
+package com.nguyenquyen.common.kafka.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +11,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatEvent {
+public class ChatEvent implements BaseEvent {
 
     private String type;
     private String actorId;

@@ -7,9 +7,9 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
-import com.nguyenquyen.chatservice.kafka.ChatEvent;
+import com.nguyenquyen.common.kafka.event.ChatEvent;
 import com.nguyenquyen.chatservice.kafka.ChatEventPublisher;
-import com.nguyenquyen.chatservice.kafka.ChatEventType;
+import com.nguyenquyen.common.kafka.event.ChatEventType;
 
 import java.security.Principal;
 

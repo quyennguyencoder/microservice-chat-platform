@@ -1,11 +1,11 @@
 package com.nguyenquyen.userservice.friendship;
 
-import com.nguyenquyen.userservice.exception.BadRequestException;
+import com.nguyenquyen.common.exception.BadRequestException;
 import com.nguyenquyen.userservice.exception.FriendshipException;
 import com.nguyenquyen.userservice.exception.UserNotFoundException;
-import com.nguyenquyen.userservice.kafka.UserEvent;
+import com.nguyenquyen.common.kafka.event.UserEvent;
 import com.nguyenquyen.userservice.kafka.UserEventPublisher;
-import com.nguyenquyen.userservice.kafka.UserEventType;
+import com.nguyenquyen.common.kafka.event.UserEventType;
 import com.nguyenquyen.userservice.user.User;
 import com.nguyenquyen.userservice.user.UserRepository;
 import lombok.RequiredArgsConstructor;

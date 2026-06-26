@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-import com.nguyenquyen.notificationservice.kafka.event.ChatEvent;
+import com.nguyenquyen.common.kafka.event.ChatEvent;
 import com.nguyenquyen.notificationservice.notification.NotificationService;
 import java.util.Set;
 
@@ -18,7 +18,7 @@ public class ChatEventConsumer {
     @KafkaListener(
             topics = "${kafka.topics.chat-events:chat-events}",
             groupId = "notification-service",
-            properties = {"spring.json.value.default.type=com.nguyenquyen.notificationservice.kafka.event.ChatEvent"}
+            properties = {"spring.json.value.default.type=com.nguyenquyen.common.kafka.event.ChatEvent"}
     )
     public void consume(ChatEvent event) {
         log.info("Received chat event: type={}, chatId={}, sender={}, recipient={}",

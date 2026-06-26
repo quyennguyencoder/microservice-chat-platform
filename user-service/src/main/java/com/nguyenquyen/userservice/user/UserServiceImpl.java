@@ -7,9 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.nguyenquyen.userservice.client.ImageService;
 import com.nguyenquyen.userservice.exception.UsernameAlreadyExistsException;
 import com.nguyenquyen.userservice.exception.UserNotFoundException;
-import com.nguyenquyen.userservice.kafka.UserEvent;
+import com.nguyenquyen.common.kafka.event.UserEvent;
 import com.nguyenquyen.userservice.kafka.UserEventPublisher;
-import com.nguyenquyen.userservice.kafka.UserEventType;
+import com.nguyenquyen.common.kafka.event.UserEventType;
 
 import java.util.function.Consumer;
 

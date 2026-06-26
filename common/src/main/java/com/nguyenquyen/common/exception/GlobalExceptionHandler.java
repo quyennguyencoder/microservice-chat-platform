@@ -1,4 +1,4 @@
-package com.nguyenquyen.searchservice.handler;
+package com.nguyenquyen.common.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -6,9 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import com.nguyenquyen.searchservice.exception.IndexingException;
-import com.nguyenquyen.searchservice.exception.ResourceNotFoundException;
-import com.nguyenquyen.searchservice.exception.SearchException;
 
 import java.time.OffsetDateTime;
 import java.util.Collections;
@@ -18,27 +15,14 @@ import java.util.List;
 @Slf4j
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(SearchException.class)
-    public ResponseEntity<ErrorResponse> handleSearchException(SearchException exception) {
-        log.error("Search error: {}", exception.getMessage(), exception);
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ErrorResponse> handleBadRequestException(BadRequestException exception) {
+        log.warn("Bad request: {}", exception.getMessage());
         return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(
                         OffsetDateTime.now(),
-                        "Search Error",
-                        exception.getMessage(),
-                        Collections.singletonList(exception.getMessage())
-                ));
-    }
-
-    @ExceptionHandler(IndexingException.class)
-    public ResponseEntity<ErrorResponse> handleIndexingException(IndexingException exception) {
-        log.error("Indexing error: {}", exception.getMessage(), exception);
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse(
-                        OffsetDateTime.now(),
-                        "Indexing Error",
+                        "Bad Request",
                         exception.getMessage(),
                         Collections.singletonList(exception.getMessage())
                 ));
@@ -52,6 +36,19 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(
                         OffsetDateTime.now(),
                         "Not Found",
+                        exception.getMessage(),
+                        Collections.singletonList(exception.getMessage())
+                ));
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException exception) {
+        log.warn("Unauthorized access: {}", exception.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorResponse(
+                        OffsetDateTime.now(),
+                        "Unauthorized",
                         exception.getMessage(),
                         Collections.singletonList(exception.getMessage())
                 ));
@@ -75,8 +72,22 @@ public class GlobalExceptionHandler {
                 ));
     }
 
+    // You can also add generic handling for Spring Security's AccessDeniedException if present on the classpath
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception exception) {
+        // If it's a Spring Security AccessDeniedException, handle it properly without explicitly depending on it
+        if (exception.getClass().getName().equals("org.springframework.security.access.AccessDeniedException")) {
+            log.warn("Access denied: {}", exception.getMessage());
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(new ErrorResponse(
+                            OffsetDateTime.now(),
+                            "Forbidden",
+                            exception.getMessage(),
+                            Collections.singletonList(exception.getMessage())
+                    ));
+        }
+
         log.error("Unexpected error occurred", exception);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)

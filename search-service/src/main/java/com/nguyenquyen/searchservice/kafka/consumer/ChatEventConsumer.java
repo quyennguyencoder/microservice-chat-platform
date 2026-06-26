@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
-import com.nguyenquyen.searchservice.kafka.event.ChatEvent;
-import com.nguyenquyen.searchservice.kafka.event.ChatEventType;
+import com.nguyenquyen.common.kafka.event.ChatEvent;
+import com.nguyenquyen.common.kafka.event.ChatEventType;
 import com.nguyenquyen.searchservice.message.MessageDocument;
 import com.nguyenquyen.searchservice.message.MessageSearchService;
 
@@ -18,7 +18,8 @@ public class ChatEventConsumer {
 
     @KafkaListener(
             topics = "${kafka.topics.chat-events:chat-events}",
-            groupId = "${spring.kafka.consumer.group-id:search-service-group}"
+            groupId = "${spring.kafka.consumer.group-id:search-service-group}",
+            properties = {"spring.json.value.default.type=com.nguyenquyen.common.kafka.event.ChatEvent"}
     )
     public void consumeChatEvent(ChatEvent event) {
         log.debug("Consumed chat event: type={}, chatId={}, messageId={}",

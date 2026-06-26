@@ -5,9 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.nguyenquyen.userservice.kafka.UserEvent;
+import com.nguyenquyen.common.kafka.event.UserEvent;
 import com.nguyenquyen.userservice.kafka.UserEventPublisher;
-import com.nguyenquyen.userservice.kafka.UserEventType;
+import com.nguyenquyen.common.kafka.event.UserEventType;
 
 import java.time.Instant;
 import java.util.Objects;

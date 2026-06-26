@@ -3,9 +3,8 @@ package com.nguyenquyen.notificationservice.notification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import com.nguyenquyen.notificationservice.kafka.event.BaseEvent;
-import com.nguyenquyen.notificationservice.kafka.event.ChatEvent;
-import com.nguyenquyen.notificationservice.kafka.event.ChatEvent;
+import com.nguyenquyen.common.kafka.event.BaseEvent;
+import com.nguyenquyen.common.kafka.event.ChatEvent;
 
 import java.util.Optional;
 import java.util.UUID;

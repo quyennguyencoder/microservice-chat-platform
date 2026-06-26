@@ -1,7 +1,9 @@
 package com.nguyenquyen.userservice.exception;
 
 
-public class UsernameAlreadyExistsException extends RuntimeException {
+import com.nguyenquyen.common.exception.BadRequestException;
+
+public class UsernameAlreadyExistsException extends BadRequestException {
     public UsernameAlreadyExistsException(String message) {
         super(message);
     }

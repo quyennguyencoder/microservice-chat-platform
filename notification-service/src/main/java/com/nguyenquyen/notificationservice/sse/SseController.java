@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-import com.nguyenquyen.notificationservice.util.SecurityUtils;
+import com.nguyenquyen.common.util.SecurityUtils;
 
 @RestController
 @RequestMapping("/api/v1/sse")

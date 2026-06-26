@@ -3,8 +3,7 @@ package com.nguyenquyen.userservice.user;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
+import com.nguyenquyen.common.util.SecurityUtils;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,8 +14,8 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/me")
-    public ResponseEntity<UserResponse> getCurrentUser(@AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(userService.getUserById(jwt.getSubject()));
+    public ResponseEntity<UserResponse> getCurrentUser() {
+        return ResponseEntity.ok(userService.getUserById(SecurityUtils.requireCurrentUserId()));
     }
 
     @GetMapping("/{userId}")
@@ -31,10 +30,9 @@ public class UserController {
 
     @PatchMapping(value = "/me")
     public ResponseEntity<UserResponse> updateUser(
-            @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody UserUpdateRequest userUpdateRequest) {
 
-        return ResponseEntity.ok(userService.updateUser(jwt.getSubject(), userUpdateRequest));
+        return ResponseEntity.ok(userService.updateUser(SecurityUtils.requireCurrentUserId(), userUpdateRequest));
     }
 
 }
