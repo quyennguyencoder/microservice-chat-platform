@@ -1,48 +1,48 @@
-# 🚀 Kịch Bản Tích Hợp Chuẩn Enterprise: OpenTelemetry Collector + Zipkin + Prometheus + Grafana + ELK
+# 🚀 Kịch Bản Tích Hợp Chuẩn Enterprise Thực Thụ: OTel Collector (Traces + Metrics + Logs) + Zipkin + Prometheus + Grafana + Elasticsearch
 
-Tài liệu này nâng cấp kiến trúc giám sát của **ZChat** lên tiêu chuẩn **Doanh nghiệp lớn (Enterprise Grade)** bằng cách đặt **OpenTelemetry Collector (OTel Collector)** làm trạm trung chuyển trung tâm. 
+Tài liệu này nâng cấp kiến trúc giám sát của **ZChat** lên tiêu chuẩn **Doanh nghiệp Thực thụ (True Enterprise Grade)** theo đúng chuẩn Cloud Native.
 
-Thay vì 10 microservices phải tự kết nối lẻ tẻ đến nhiều công cụ khác nhau, toàn bộ ứng dụng chỉ gửi dữ liệu về **1 cổng duy nhất** (`4318`) của OTel Collector.
+Toàn bộ 3 trụ cột dữ liệu quan trắc (**Traces, Metrics, Logs**) đều được hội tụ về **1 cổng duy nhất** (`4318`) của **OpenTelemetry Collector**. Collector được trang bị bộ bảo vệ chống tràn RAM (`memory_limiter`) và trực tiếp phân phối dữ liệu sang các kho lưu trữ chuyên dụng mà **không cần Logstash hay Prometheus Scrape lẻ tẻ**.
 
 ---
 
-## 1. Bức Tranh Kiến Trúc Chuẩn Enterprise
+## 1. Bức Tranh Kiến Trúc Chuẩn Enterprise Thực Thụ
 
 ```mermaid
 flowchart TD
     subgraph ZChat [10 Microservices ZChat :8000 -> :8050]
-        APP[Spring Boot 3 App]
+        APP[Spring Boot 3 App<br>OTLP Exporter]
     end
 
-    subgraph Central [Trạm Trung Chuyển]
-        OTEL[OTel Collector :4318]
+    subgraph Central [Trạm Bưu Điện: OTel Collector :4318]
+        REC[Receiver: OTLP]
+        PROC[Processors:<br>1. memory_limiter 512MB<br>2. batch]
+        EXP[Exporters:<br>zipkin / prometheusremotewrite / elasticsearch]
     end
 
-    subgraph Backends [Kho Lưu Trữ & Hiển Thị]
-        PROM[(Prometheus :9091)]
-        GRAF[Grafana UI :3001]
+    subgraph Backends [Kho Lưu Trữ & Trực Quan Hóa]
         ZIP[Zipkin UI :9411]
-        LS[Logstash :5000]
+        PROM[(Prometheus :9091<br>Remote Write)]
+        GRAF[Grafana UI :3001]
         ES[(Elasticsearch :9200)]
         KIB[Kibana UI :5601]
     end
 
-    APP -->|1. Quăng toàn bộ Trace chuẩn OTLP vào 1 cổng| OTEL
-    APP -->|2. TCP Log JSON có TraceId| LS
+    APP -->|100% Telemetry: Traces + Metrics + Logs| REC
+    REC --> PROC --> EXP
 
-    OTEL -->|Phân phối Trace| ZIP
-    APP -->|Prometheus Scrape Actuator| PROM
-    PROM -->|Biểu đồ| GRAF
-
-    LS -->|Index| ES
-    ES -->|Tìm kiếm| KIB
+    EXP -->|Push Traces| ZIP
+    EXP -->|Push Metrics Remote Write| PROM
+    PROM -->|Vẽ Biểu Đồ| GRAF
+    EXP -->|Push Logs Direct| ES
+    ES -->|Tìm Kiếm Full-text| KIB
 ```
 
 ---
 
-## 2. Bước 1: Cập nhật `docker-compose.yml`
+## 2. Bước 1: Cập nhật `docker-compose.yml` (Đã loại bỏ Logstash & Bật Remote Write)
 
-Bổ sung container `otel-collector` cùng bộ tứ giám sát vào `docker-compose.yml`:
+Bổ sung container `otel-collector` và cấu hình lại Prometheus để cho phép nhận remote write từ Collector:
 
 ```yaml
   # ==================== ENTERPRISE OBSERVABILITY STACK ====================
@@ -59,6 +59,8 @@ Bổ sung container `otel-collector` cùng bộ tứ giám sát vào `docker-com
       - "4318:4318" # OTLP HTTP receiver
     depends_on:
       - zipkin
+      - prometheus
+      - elasticsearch
     restart: unless-stopped
 
   # 2. Distributed Tracing UI
@@ -69,10 +71,13 @@ Bổ sung container `otel-collector` cùng bộ tứ giám sát vào `docker-com
       - "9411:9411"
     restart: unless-stopped
 
-  # 3. Metrics Collector
+  # 3. Metrics Storage (Bật tính năng Remote Write Receiver)
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--web.enable-remote-write-receiver" # BẮT BUỘC để OTel Collector đẩy metrics vào
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
@@ -90,27 +95,15 @@ Bổ sung container `otel-collector` cùng bộ tứ giám sát vào `docker-com
     depends_on:
       - prometheus
     restart: unless-stopped
-
-  # 5. Log Shipper
-  logstash:
-    image: docker.elastic.co/logstash/logstash:8.15.0
-    container_name: logstash
-    ports:
-      - "5000:5000/tcp"
-    environment:
-      - "LS_JAVA_OPTS=-Xms256m -Xmx256m"
-    volumes:
-      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
-    depends_on:
-      - elasticsearch
-    restart: unless-stopped
 ```
+
+*(Lưu ý: Container **Logstash đã được loại bỏ hoàn toàn** giúp tiết kiệm ~300MB RAM, vì OTel Collector sẽ đẩy log thẳng vào Elasticsearch).*
 
 ---
 
-## 3. Bước 2: Tạo cấu hình Trạm trung chuyển `otel-collector-config.yml`
+## 3. Bước 2: Cấu hình Trạm Bưu Điện `otel-collector-config.yml` (Có Memory Limiter)
 
-Tạo file `otel-collector-config.yml` ngang hàng với `docker-compose.yml`. Định nghĩa bộ tiếp nhận (Receivers), gia công (Processors) và phân phối (Exporters):
+Tạo file `otel-collector-config.yml` ngang hàng với `docker-compose.yml`. Định nghĩa đầy đủ 3 pipeline (**Traces, Metrics, Logs**) với bộ bảo vệ `memory_limiter` đứng đầu tiên:
 
 ```yaml
 receivers:
@@ -122,16 +115,33 @@ receivers:
         endpoint: 0.0.0.0:4318
 
 processors:
+  # BẮT BUỘC: Bảo vệ OTel Collector không bị crash OOM khi traffic tăng đột biến
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 512
+    spike_limit_mib: 128
+
+  # Gom nhóm gói tin tối ưu hiệu năng
   batch:
     timeout: 1s
     send_batch_size: 1024
 
 exporters:
-  # Xuất dấu vết sang Zipkin
+  # 1. Xuất dấu vết sang Zipkin
   zipkin:
     endpoint: "http://zipkin:9411/api/v2/spans"
     format: json
-  # In log debug ra console của OTel Collector để kiểm tra
+
+  # 2. Xuất con số sang Prometheus qua cơ chế Remote Write
+  prometheusremotewrite:
+    endpoint: "http://prometheus:9090/api/v1/write"
+
+  # 3. Xuất nhật ký trực tiếp vào Elasticsearch (Thay thế Logstash)
+  elasticsearch:
+    endpoints: ["http://elasticsearch:9200"]
+    logs_index: "zchat-logs"
+
+  # Debug ra console của Collector
   debug:
     verbosity: basic
 
@@ -139,15 +149,23 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [batch]
+      processors: [memory_limiter, batch]
       exporters: [zipkin, debug]
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [prometheusremotewrite, debug]
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [elasticsearch, debug]
 ```
 
 ---
 
 ## 4. Bước 3: Cài đặt Exporter Chuẩn Quốc Tế trong `common/pom.xml`
 
-Thay vì cài Exporter riêng lẻ cho Zipkin hay Jaeger, ta dùng thư viện Exporter chuẩn chung OTLP:
+Sử dụng bộ thư viện Exporter chuẩn chung OTLP để gửi toàn bộ Traces, Metrics và Logs:
 
 ```xml
 <!-- Gửi tín hiệu chuẩn OTLP sang OTel Collector -->
@@ -159,9 +177,14 @@ Thay vì cài Exporter riêng lẻ cho Zipkin hay Jaeger, ta dùng thư viện E
 
 ---
 
-## 5. Bước 4: Cấu hình Spring Boot chuyển tín hiệu về Collector (`application.yml`)
+## 5. Bước 4: Cấu hình Spring Boot phân biệt Môi trường (`application.yml`)
 
-Tại file cấu hình chung của Config Server (`config-server/.../application.yml`), trỏ endpoint về cổng `4318` của OTel Collector:
+> [!WARNING]
+> **Phân biệt địa chỉ Endpoint (Localhost vs Docker Network):**
+> * Khi chạy app bằng IDE ngoài máy cục bộ (chưa vào Docker): Endpoint là `http://localhost:4318`.
+> * Khi đóng gói app chạy bên trong mạng Docker (Docker Compose): Endpoint phải là `http://otel-collector:4318`.
+
+Cấu hình tối ưu trong `config-server/.../application.yml` sử dụng biến môi trường linh hoạt:
 
 ```yaml
 management:
@@ -170,61 +193,49 @@ management:
       probability: 1.0 # 100% request được ghi nhận
   otlp:
     tracing:
-      endpoint: http://localhost:4318/v1/traces # Quăng toàn bộ dấu vết vào OTel Collector
+      # Tự động nhận diện: Nếu có biến môi trường OTEL_EXPORTER_OTLP_ENDPOINT thì dùng, không thì mặc định localhost
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318}/v1/traces
+    metrics:
+      export:
+        url: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318}/v1/metrics
+        step: 15s
+    logs:
+      export:
+        url: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318}/v1/logs
 
   endpoints:
     web:
       exposure:
-        include: "health,info,prometheus,metrics" # Cho phép Prometheus hút số liệu
+        include: "health,info,prometheus,metrics"
 ```
+
+*(Khi khai báo trong `docker-compose.yml` cho các service, bạn chỉ cần truyền biến môi trường: `OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318`).*
 
 ---
 
-## 6. Cấu hình phụ trợ (`prometheus.yml` & `logstash.conf`)
+## 6. Cấu hình phụ trợ (`prometheus.yml`)
 
-**File `prometheus.yml` (Hút số liệu từ dải port 8000 -> 8050):**
+Vì Prometheus hiện tại nhận dữ liệu từ OTel Collector đẩy vào qua Remote Write, file `prometheus.yml` chỉ cần cấu hình đơn giản để duy trì hệ thống:
+
 ```yaml
 global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: 'zchat-microservices'
-    metrics_path: '/actuator/prometheus'
+  - job_name: 'prometheus-self'
     static_configs:
-      - targets:
-          - 'host.docker.internal:8000' # Gateway
-          - 'host.docker.internal:8010' # User
-          - 'host.docker.internal:8020' # Chat
-          - 'host.docker.internal:8030' # Notification
-          - 'host.docker.internal:8040' # Search
-          - 'host.docker.internal:8050' # Storage
-```
-
-**File `logstash.conf` (Hứng log JSON đổ vào Elasticsearch):**
-```conf
-input {
-  tcp {
-    port => 5000
-    codec => json_lines
-  }
-}
-output {
-  elasticsearch {
-    hosts => ["http://elasticsearch:9200"]
-    index => "zchat-logs-%{+YYYY.MM.dd}"
-  }
-}
+      - targets: ['localhost:9090']
 ```
 
 ---
 
 ## 7. Danh Mục Cổng Truy Cập (Port Directory)
 
-Khởi động hệ thống bằng lệnh `docker-compose up -d`. Bảng tổng hợp cổng vận hành:
+Khởi động hệ thống bằng lệnh `docker-compose up -d`. Bảng tổng hợp cổng vận hành chuẩn Enterprise:
 
 | Dịch vụ / Công cụ | Cổng (Port) | URL Truy cập | Tài khoản | Vai trò trong hệ thống |
 | :--- | :---: | :--- | :---: | :--- |
-| **OTel Collector**| `4318` | `http://localhost:4318` | — | Trạm trung chuyển nhận tín hiệu OTLP |
+| **OTel Collector**| `4318` | `http://localhost:4318` | — | Trạm trung chuyển duy nhất nhận OTLP Traces/Metrics/Logs |
 | **API Gateway** | `8000` | `http://localhost:8000` | — | Mặt tiền duy nhất cho Frontend |
 | **User Service** | `8010` | `http://localhost:8010` | — | Microservice quản lý người dùng |
 | **Chat Service** | `8020` | `http://localhost:8020` | — | Microservice nhắn tin thời gian thực |
@@ -234,4 +245,4 @@ Khởi động hệ thống bằng lệnh `docker-compose up -d`. Bảng tổng 
 | **Grafana UI** | `3001` | `http://localhost:3001` | `admin / admin` | Táp-lô biểu đồ con số Server/APIs |
 | **Zipkin UI** | `9411` | `http://localhost:9411` | — | Sa bàn theo dõi thời gian phản hồi |
 | **Kibana UI** | `5601` | `http://localhost:5601` | — | Tra cứu log văn bản lỗi theo `TraceId` |
-| **Prometheus** | `9091` | `http://localhost:9091` | — | Kho chứa dữ liệu Time-series cho Grafana |
+| **Prometheus** | `9091` | `http://localhost:9091` | — | Kho dữ liệu Time-series (Nhận qua Remote Write) |
