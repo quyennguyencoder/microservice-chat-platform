@@ -14,6 +14,12 @@ spring:
     config:
       override.system-property: false
 
+  kafka:
+    template:
+      observation-enabled: true
+    listener:
+      observation-enabled: true
+
   security:
     oauth2:
       resourceserver:
@@ -35,7 +41,7 @@ logging:
     com.nguyenquyen: DEBUG
 
   pattern:
-    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr([%thread]){magenta} %clr(%-5level){highlight} %clr(%logger{36}){cyan} - %msg%n"
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr([%thread]){magenta} %clr(%-5level){highlight} %clr([${spring.application.name:},%X{traceId:-},%X{spanId:-}]){yellow} %clr(%logger{36}){cyan} - %msg%n"
 
 springdoc:
   api-docs:
@@ -53,6 +59,9 @@ cors:
   max-age: 3600
 
 management:
+  tracing:
+    sampling:
+      probability: 1.0
   endpoints:
     web:
       exposure:
