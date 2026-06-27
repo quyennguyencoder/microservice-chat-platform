@@ -40,4 +40,4 @@ image-storage:
     pending-expiry-hours: 2
 
 server:
-  port: 8088
+  port: 8050

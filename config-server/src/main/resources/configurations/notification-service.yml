@@ -46,4 +46,4 @@ kafka:
     user-events: user-events
 
 server:
-  port: 8040
+  port: 8030

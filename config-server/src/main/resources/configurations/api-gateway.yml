@@ -176,7 +176,7 @@ springdoc:
         url: /search-service/v3/api-docs
 
 server:
-  port: 8222
+  port: 8000
 
 resilience4j:
   circuitbreaker:

@@ -43,4 +43,4 @@ kafka:
     chat-events: chat-events
 
 server:
-  port: 8030
+  port: 8020
