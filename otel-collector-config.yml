@@ -1,0 +1,53 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  # BẮT BUỘC: Bảo vệ OTel Collector không bị crash OOM khi traffic tăng đột biến
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 512
+    spike_limit_mib: 128
+
+  # Gom nhóm gói tin tối ưu hiệu năng
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+
+exporters:
+  # 1. Xuất dấu vết sang Zipkin
+  zipkin:
+    endpoint: "http://zipkin:9411/api/v2/spans"
+    format: json
+
+  # 2. Xuất con số sang Prometheus qua cơ chế Remote Write
+  prometheusremotewrite:
+    endpoint: "http://prometheus:9090/api/v1/write"
+
+  # 3. Xuất nhật ký trực tiếp vào Elasticsearch (Thay thế Logstash)
+  elasticsearch:
+    endpoints: ["http://elasticsearch:9200"]
+    logs_index: "zchat-logs"
+
+  # Debug ra console của Collector
+  debug:
+    verbosity: basic
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [zipkin, debug]
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [prometheusremotewrite, debug]
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [elasticsearch, debug]
