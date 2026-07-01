@@ -53,8 +53,8 @@ Grafana giúp bạn biến những con số khô khan thành biểu đồ trực
 ### Bước 2: Import Dashboard chuẩn Spring Boot 3 (JVM / Micrometer)
 Không cần tự vẽ biểu đồ từ đầu, bạn có thể dùng sẵn Dashboard chuẩn của cộng đồng toàn cầu:
 1. Nhấp vào dấu cộng **"+"** ở menu bên trái ➔ **Import dashboard**.
-2. Tại ô **Import via grafana.com**, nhập mã ID: **`4701`** (hoặc **`11378`**) rồi bấm **Load**.
-3. Chọn Data Source là **Prometheus** vừa tạo ➔ Bấm **Import**.
+2. Tại ô **Import via grafana.com**, nhập mã ID: **`11378`** *(Khuyên dùng - JVM Micrometer chuẩn nhất cho Spring Boot 3)* rồi bấm **Load**.
+3. **⚠️ BƯỚC QUYẾT ĐỊNH (Tránh lỗi Datasource not found):** Ở dưới cùng màn hình Options, tại ô dropdown **`prometheus`** (hoặc `Select a Prometheus data source`), hãy nhấp vào và chọn Data Source **`Prometheus`** bạn vừa tạo ở trên ➔ Sau đó mới bấm **Import**.
 4. **Thành quả:** Bạn sẽ có ngay một bảng điều khiển siêu đẹp hiển thị:
    * **JVM Memory:** Lượng RAM Heap/Non-Heap đang sử dụng của từng microservice.
    * **CPU Usage:** % CPU server đang tiêu thụ.

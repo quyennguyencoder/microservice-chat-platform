@@ -57,8 +57,6 @@ index:
     name: users
   messages:
     name: messages
-  search-history:
-    name: search_history
 
 # Analytics cleanup
 analytics:
