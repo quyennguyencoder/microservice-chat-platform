@@ -27,6 +27,7 @@ spring:
           issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:9090/realms/zchat}
 
 logging:
+  config: classpath:logback-spring.xml
   level:
     root: INFO
 

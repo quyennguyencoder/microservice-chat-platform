@@ -32,6 +32,9 @@ exporters:
   elasticsearch:
     endpoints: ["http://elasticsearch:9200"]
     logs_index: "zchat-logs"
+    pipeline: ""
+    mapping:
+      mode: none
 
   # Debug ra console của Collector
   debug:
