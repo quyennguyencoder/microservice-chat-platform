@@ -27,20 +27,20 @@
         </dependency>
         <dependency>
             <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-tracing-bridge-otel</artifactId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
         <dependency>
             <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-registry-otlp</artifactId>
+            <artifactId>micrometer-tracing-bridge-brave</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-exporter-otlp</artifactId>
+            <groupId>io.zipkin.reporter2</groupId>
+            <artifactId>zipkin-reporter-brave</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.opentelemetry.instrumentation</groupId>
-            <artifactId>opentelemetry-logback-appender-1.0</artifactId>
-            <version>2.14.0-alpha</version>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>8.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

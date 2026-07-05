@@ -1,0 +1,42 @@
+groups:
+  - name: zchat_microservices_alerts
+    rules:
+      # 1. Cảnh báo khi Microservice bị down (không phản hồi scraping trong 1 phút)
+      - alert: InstanceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Microservice {{ $labels.job }} ({{ $labels.instance }}) đã bị DOWN!"
+          description: "Service {{ $labels.job }} tại {{ $labels.instance }} không phản hồi Prometheus scrape trong 1 phút qua."
+
+      # 2. Cảnh báo khi CPU của Service vượt quá 85% trong 3 phút
+      - alert: HighCpuUsage
+        expr: system_cpu_usage > 0.85
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU của {{ $labels.job }} đang ở mức cao ({{ $value | humanizePercentage }})"
+          description: "Mức tiêu thụ CPU của service {{ $labels.job }} vượt ngưỡng 85% trong 3 phút qua."
+
+      # 3. Cảnh báo khi RAM Heap JVM vượt quá 85% (Nguy cơ OutOfMemoryError)
+      - alert: HighJvmHeapUsage
+        expr: sum by (instance, job) (jvm_memory_used_bytes{area="heap"}) / sum by (instance, job) (jvm_memory_max_bytes{area="heap"}) > 0.85
+        for: 3m
+        labels:
+          severity: critical
+        annotations:
+          summary: "JVM Heap Memory của {{ $labels.job }} vượt quá 85%!"
+          description: "Mức sử dụng RAM Heap của service {{ $labels.job }} đạt {{ $value | humanizePercentage }}. Cần kiểm tra rò rỉ bộ nhớ hoặc tăng heap size."
+
+      # 4. Cảnh báo khi tỷ lệ lỗi HTTP 5xx vượt quá 5% trong 2 phút
+      - alert: HighHttp5xxErrorRate
+        expr: sum by (job) (rate(http_server_requests_seconds_count{status=~"5.."}[2m])) / sum by (job) (rate(http_server_requests_seconds_count[2m])) * 100 > 5
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Tỷ lệ lỗi HTTP 5xx của {{ $labels.job }} vượt quá 5%!"
+          description: "Trong 2 phút qua, tỷ lệ request trả về lỗi 5xx của service {{ $labels.job }} đang là {{ $value | printf \"%.2f\" }}%."

@@ -70,7 +70,7 @@ Thay vì phải mở terminal gõ `docker logs` cho 10 container khác nhau, to�
 1. Mở Kibana tại **`http://localhost:5601`**.
 2. Vào menu bên trái ➔ **Stack Management** ➔ **Data Views** ➔ **Create data view**.
 3. Tại ô **Name**, nhập: `ZChat Logs`.
-4. Tại ô **Index pattern**, nhập: `zchat-logs*` *(Đây là chỉ mục mà OTel Collector đã cấu hình đẩy vào)*.
+4. Tại ô **Index pattern**, nhập: `zchat-logs*` *(Đây là chỉ mục mà Logstash đã cấu hình đẩy vào)*.
 5. Chọn Timestamp field là `@timestamp` ➔ Bấm **Save data view**.
 
 ### Bước 2: Kỹ Thuật Điều Tra Sự Cố Thần Tốc (KQL Search)
@@ -111,3 +111,57 @@ sequenceDiagram
     K-->>DevOps: Hiển thị trọn bộ log chi tiết: Exception Stacktrace, SQL Query bị từ chối
     Note over DevOps: Bắt đúng bệnh ➔ Fix bug thần tốc!
 ```
+
+---
+
+## 6. 📲 Hướng Dẫn Tích Hợp Cảnh Báo Ra Telegram (Telegram Alerting via Grafana)
+
+Trong kiến trúc ZChat, cách nhanh nhất và chuẩn nhất để gửi cảnh báo tự động ra Telegram là sử dụng tính năng **Grafana Alerting (Contact Points)** đã được tích hợp sẵn trên giao diện Grafana (cổng `3001`). Hệ thống sẽ tự động đọc 4 luật cảnh báo sinh tồn trong `alert.rules.yml` và nhắn tin báo động ngay khi xảy ra sự cố.
+
+### Bước 1: Tạo Telegram Bot (Khâu chuẩn bị trên Telegram)
+1. Mở ứng dụng Telegram, tìm kiếm bot **`@BotFather`** (Bot chính chủ của Telegram có tích xanh).
+2. Gõ lệnh `/newbot` để tạo bot mới.
+3. Nhập tên hiển thị cho Bot (Ví dụ: `ZChat Observability Alert`).
+4. Nhập username cho Bot (bắt buộc kết thúc bằng chữ `_bot`, ví dụ: `zchat_monitor_bot`).
+5. **@BotFather** sẽ gửi lại cho bạn một chuỗi mã xác thực gọi là **Bot API Token** (Có dạng: `7123456789:AAHdqTcvCH1vGWJxf-a...`). 
+   👉 **Hãy copy và lưu mã Token này lại.**
+
+### Bước 2: Lấy Chat ID của bạn (Hoặc Group DevOps)
+Bot Telegram cần biết phải gửi tin nhắn cảnh báo cho ai (Cá nhân bạn hay Nhóm chat DevOps).
+1. Trên Telegram, hãy tìm bot bạn vừa tạo (ví dụ `@zchat_monitor_bot`) và bấm **Start** (hoặc gửi một tin nhắn bất kỳ như `Hello` vào group có add bot đó).
+2. Để lấy **Chat ID** nhanh nhất, hãy tìm và nhắn tin cho bot hỗ trợ **`@userinfobot`** (hoặc `@RawDataBot`), bot sẽ trả về cho bạn dòng **`Id: 123456789`** (Nếu là Group chat, ID thường có dấu trừ ở đầu, ví dụ `-100987654321`).
+   👉 **Hãy copy mã Chat ID này lại.**
+
+### Bước 3: Cấu hình trên Giao diện Grafana (`http://localhost:3001`)
+
+#### 3.1. Tạo Contact Point (Điểm kết nối Telegram)
+1. Đăng nhập vào Grafana tại **`http://localhost:3001`** (tài khoản: `admin` / `admin`).
+2. Nhấp vào biểu tượng cái chuông 🔔 **Alerting** ở menu bên trái ➔ Chọn **Contact points**.
+3. Bấm nút màu xanh **+ Add contact point**:
+   * **Name**: Nhập `Telegram DevOps Team`.
+   * **Integration**: Chọn **Telegram**.
+   * **BOT API Token**: Dán mã **Bot Token** (lấy ở Bước 1) vào đây.
+   * **Chat ID**: Dán mã **Chat ID** (lấy ở Bước 2) vào đây.
+4. 🧪 **Kiểm tra kết nối**: Bấm vào nút **Test** ở góc trên bên phải ➔ Bấm **Send test notification**. Nếu bạn nhận được tin nhắn từ Bot trên điện thoại với nội dung *"Test alert from Grafana"* là kết nối thành công 100%!
+5. Bấm **Save contact point** để lưu lại.
+
+#### 3.2. Gắn vào Chính sách thông báo (Notification Policy)
+1. Vẫn trong menu 🔔 **Alerting** bên trái ➔ Chọn **Notification policies**.
+2. Tại mục **Default policy** (ở ngay đầu trang), nhấp vào nút **Edit** (hoặc biểu tượng cây bút ✏️).
+3. Tại ô **Default contact point**, chọn giá trị từ dropdown là **`Telegram DevOps Team`** (mục bạn vừa tạo ở Bước 3.1).
+4. Bấm **Update default policy** để hoàn tất.
+
+### 🎉 Minh họa Tin nhắn Cảnh báo (Telegram Alert Message)
+Khi bất kỳ microservice nào gặp sự cố (ví dụ: `user-service` bị sập, CPU/RAM vượt 85%, hoặc lỗi HTTP 5xx tăng vọt), Telegram của bạn sẽ nhận được thông báo đỏ 🚨:
+
+```text
+🔥 [FIRING: 1] InstanceDown (critical zchat-user-service)
+
+🔴 CẢNH BÁO: Microservice zchat-user-service đã bị DOWN!
+• Service: user-service (tại host.docker.internal:8010)
+• Mô tả: Service không phản hồi Prometheus scrape trong 1 phút qua.
+• Thời gian phát hiện: 2026-07-05 16:35:00
+👉 Link truy cập Dashboard: http://localhost:3001/d/11378...
+```
+
+Khi sự cố được khắc phục, Grafana sẽ tự động gửi thông báo xanh 🟢 **[RESOLVED]** để xác nhận hệ thống đã phục hồi!

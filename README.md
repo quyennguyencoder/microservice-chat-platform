@@ -1,96 +1,120 @@
-# ZChat - Microservices Chat Platform
+# ZChat - Enterprise Microservices Chat Platform
 
-ZChat là một nền tảng nhắn tin thời gian thực được xây dựng theo kiến trúc **Microservices**, sử dụng **Spring Boot 3** ở backend. Hệ thống được thiết kế để đảm bảo tính mở rộng, hiệu năng cao và dễ dàng bảo trì.
-
-## 🌟 Tính năng chính
-
-- **Nhắn tin thời gian thực**: Hỗ trợ chat 1-1 và group chat (sử dụng WebSocket / STOMP).
-- **Quản lý người dùng & Xác thực**: Tích hợp SSO với **Keycloak** (OAuth2/OpenID Connect).
-- **Tìm kiếm toàn cục**: Tìm kiếm tin nhắn, người dùng nhanh chóng sử dụng **Elasticsearch**.
-- **Quản lý tệp tin**: Tải lên và tải xuống hình ảnh, tệp tin sử dụng **MinIO** (Object Storage).
-- **Hệ thống thông báo**: Gửi thông báo đẩy (Push notifications) thông qua **Kafka** (Message Broker).
-- **Giám sát & Logging**: Tích hợp **Kibana** để phân tích log hệ thống.
+ZChat is a modern, real-time messaging platform built on a **Microservices** architecture powered by **Spring Boot 3** and **Spring Cloud**. Designed for high scalability, resilience, and cloud-native observability, ZChat provides seamless 1-on-1 and group communication with enterprise-grade monitoring and infrastructure.
 
 ---
 
-## 🏗 Kiến trúc hệ thống
+## 🌟 Key Features
 
-Hệ thống bao gồm các thành phần chính sau:
-
-### 1. Backend (Spring Boot & Spring Cloud)
-- **`api-gateway`**: Cổng giao tiếp API, định tuyến request và phân giải token.
-- **`discovery-server`**: Service Registry sử dụng Netflix Eureka.
-- **`config-server`**: Quản lý cấu hình tập trung cho toàn bộ các microservices.
-- **`user-service`**: Quản lý thông tin, hồ sơ người dùng và trạng thái (online/offline).
-- **`chat-service`**: Xử lý logic tin nhắn, phòng chat và giao tiếp WebSocket.
-- **`search-service`**: Đồng bộ dữ liệu vào Elasticsearch và cung cấp API tìm kiếm.
-- **`storage-service`**: Quản lý upload/download file qua MinIO.
-- **`notification-service`**: Xử lý và gửi thông báo qua email hoặc socket dựa trên event Kafka.
-- **`common`**: Thư viện dùng chung (DTOs, Utils, Exceptions) cho các service.
-
-### 2. Cơ sở hạ tầng (Infrastructure)
-Các dịch vụ hạ tầng được triển khai qua Docker Compose:
-- **PostgreSQL 17**: Cơ sở dữ liệu quan hệ cho User, Chat, Keycloak.
-- **Redis 8**: Caching hệ thống.
-- **Kafka**: Message Broker (xử lý sự kiện bất đồng bộ).
-- **Elasticsearch 8 & Kibana**: Lưu trữ và truy vấn dữ liệu tìm kiếm / Log.
-- **MinIO**: Object Storage (S3 compatible) để lưu file đính kèm, avatar.
-- **Keycloak 26**: Identity Provider (Xác thực và phân quyền).
+- **Real-Time Messaging**: Instant 1-on-1 and group chat powered by **WebSocket / STOMP**.
+- **Authentication & Security**: Centralized Identity & Access Management (SSO) via **Keycloak** (OAuth2 / OpenID Connect / JWT).
+- **Global Full-Text Search**: Fast and accurate message and user discovery using **Elasticsearch 8**.
+- **Object Storage**: Secure file and media attachments management using **MinIO** (S3-compatible object storage).
+- **Asynchronous Event Processing**: Reliable push notifications and event-driven communication via **Apache Kafka**.
+- **Enterprise Observability Stack**: Complete **Direct Integration** monitoring covering the Three Pillars of Observability:
+  - **Metrics**: Real-time JVM, system, and custom business metrics scraped via **Prometheus** and visualized on **Grafana**.
+  - **Tracing**: Distributed request tracing across microservices with **Zipkin** and **Micrometer Tracing (Brave)**.
+  - **Centralized Logging**: Structured JSON log aggregation via **Logstash** TCP ingestion, stored in **Elasticsearch**, and analyzed on **Kibana**.
+  - **Automated Alerting**: 24/7 proactive system monitoring with automated alerts sent to **Telegram** via Grafana.
 
 ---
 
-## 🚀 Hướng dẫn cài đặt và chạy dự án
+## 🏗 System Architecture
 
-### Yêu cầu hệ thống (Prerequisites)
-- **Java 21**
+The platform is structured into core services and supporting infrastructure:
+
+### 1. Backend Microservices (Spring Boot & Spring Cloud)
+- **`api-gateway`**: Single entry point for clients; handles request routing, CORS, and JWT authentication.
+- **`discovery-server`**: Service registry and discovery powered by **Netflix Eureka**.
+- **`config-server`**: Centralized configuration management for all microservices.
+- **`user-service`**: Manages user profiles, social relationships, and online/offline presence status.
+- **`chat-service`**: Core chat engine handling messaging logic, chat rooms, and WebSocket delivery.
+- **`search-service`**: Synchronizes messaging data and exposes full-text search endpoints via Elasticsearch.
+- **`storage-service`**: Manages file uploads, downloads, and media metadata via MinIO.
+- **`notification-service`**: Event-driven notification consumer handling real-time push and email alerts via Kafka.
+- **`common`**: Shared library containing common DTOs, utilities, exceptions, and observability configurations.
+
+### 2. Infrastructure & Observability (Docker Compose)
+- **PostgreSQL 17**: Primary relational database for user data, chat metadata, and Keycloak realm persistence.
+- **Redis 8**: High-performance in-memory caching and session management.
+- **Apache Kafka 7.8**: Distributed event streaming platform and message broker.
+- **MinIO**: High-performance S3-compatible object storage.
+- **Keycloak 26**: Open-source identity and access management provider.
+- **Elasticsearch 8**: Distributed search and analytics engine for search and centralized log storage.
+- **Logstash 8**: Log ingestion pipeline listening on TCP port 5000 for structured JSON logs.
+- **Kibana 8**: Log analytics and exploration UI.
+- **Prometheus**: Time-series database scraping `/actuator/prometheus` endpoints.
+- **Grafana**: Advanced visualization dashboards and automated alerting engine.
+- **Zipkin**: Distributed tracing waterfall visualization.
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- **Java Development Kit (JDK) 21**
 - **Docker & Docker Compose**
-- **Maven**
+- **Apache Maven 3.9+**
 
-### 1. Khởi động Infrastructure (Hạ tầng)
-Di chuyển vào thư mục gốc của dự án và chạy các container:
+### 1. Launch Infrastructure & Observability Stack
+Navigate to the project root directory and start all infrastructure services using Docker Compose:
 
 ```bash
 docker-compose up -d
 ```
-*Lưu ý: Quá trình này sẽ khởi chạy PostgreSQL, Redis, Kafka, Elasticsearch, Kibana, MinIO và Keycloak. Script `init-db.sql` và `realm-export.json` sẽ tự động khởi tạo dữ liệu ban đầu cho Keycloak.*
+> [!NOTE]
+> This command starts PostgreSQL, Redis, Kafka, MinIO, Keycloak, and the entire Observability Stack (Elasticsearch, Logstash, Kibana, Prometheus, Grafana, and Zipkin). Initialization scripts (`init-db.sql` and `realm-export.json`) will automatically set up the database and Keycloak realm.
 
-### 2. Khởi động Backend (Microservices)
-Theo thứ tự ưu tiên, bạn cần khởi chạy các core services trước, sau đó là các domain services:
+### 2. Launch Microservices
+Start the backend microservices in the following strict order to ensure proper dependency resolution:
 
-1. Chạy **`config-server`** (Đợi cho tới khi báo thành công).
-2. Chạy **`discovery-server`** (Eureka).
-3. Chạy **`api-gateway`**.
-4. Chạy các services còn lại: `user-service`, `chat-service`, `search-service`, `storage-service`, `notification-service`.
+1. **`config-server`** (Wait until started and serving configurations)
+2. **`discovery-server`** (Eureka Registry)
+3. **`api-gateway`**
+4. **Domain Services**: `user-service`, `chat-service`, `search-service`, `storage-service`, `notification-service`
 
-Bạn có thể chạy các service này thông qua IDE (IntelliJ IDEA) hoặc dùng Maven:
+You can run individual microservices via your IDE (e.g., IntelliJ IDEA) or using the Maven Spring Boot plugin:
 ```bash
-mvn spring-boot:run -pl <tên-module>
+mvn spring-boot:run -pl <module-name>
 ```
 
 ---
 
-## 📚 Thông tin truy cập nội bộ (Local)
+## 🌐 Local Access & Port Directory
 
-- **Eureka Dashboard**: http://localhost:8761
-- **API Gateway**: http://localhost:8080
-- **Keycloak Admin Console**: http://localhost:9090 (admin / admin)
-- **MinIO Console**: http://localhost:9001 (minioadmin / minioadmin)
-- **Kibana**: http://localhost:5601
-
----
-
-## 🛠 Công nghệ (Tech Stack)
-
-**Backend:**
-- Java 21, Spring Boot 3.5.x, Spring Cloud 2025.0.x
-- Spring Security, OAuth2 Resource Server
-- Spring Data JPA, Hibernate, MapStruct, Lombok
-
-**DevOps & Infrastructure:**
-- Docker, Docker Compose
-- PostgreSQL, Redis, Apache Kafka, Elasticsearch, MinIO, Keycloak
+| Service / Tool | Port | Local URL | Default Credentials | Description |
+| :--- | :---: | :--- | :---: | :--- |
+| **API Gateway** | `8000` | http://localhost:8000 | — | Main API entry point for frontend clients |
+| **Eureka Dashboard** | `8761` | http://localhost:8761 | — | Microservices registry and status monitor |
+| **Keycloak Admin** | `9090` | http://localhost:9090 | `admin` / `admin` | Identity and IAM administration |
+| **MinIO Console** | `9001` | http://localhost:9001 | `minioadmin` / `minioadmin` | Object storage bucket management |
+| **Grafana UI** | `3001` | http://localhost:3001 | `admin` / `admin` | Metrics dashboards and Telegram alerting |
+| **Kibana UI** | `5601` | http://localhost:5601 | — | Centralized log search and analytics |
+| **Zipkin UI** | `9411` | http://localhost:9411 | — | Distributed tracing and latency analysis |
+| **Prometheus** | `9091` | http://localhost:9091 | — | Time-series metrics query interface |
 
 ---
 
-## 📄 Giấy phép (License)
-Dự án được xây dựng cho mục đích học tập và phát triển cá nhân. (Tùy chỉnh thông tin license của bạn ở đây).
+## 📖 Observability & Documentation
+
+For detailed guides on operating the monitoring stack, debugging distributed traces, searching logs with KQL, and setting up automated Telegram alerts, refer to our comprehensive architecture documentation:
+- [Observability User Guide](docs/architecture/observability_user_guide.md)
+- [Direct Observability Stack Migration](docs/architecture/migration_to_direct_observability_stack.md)
+- [The Three Pillars of Observability](docs/architecture/observability_three_pillars.md)
+
+---
+
+## 🛠 Tech Stack
+
+- **Core & Framework**: Java 21, Spring Boot 3.5.x, Spring Cloud 2025.0.x
+- **Security**: Spring Security, OAuth2 Resource Server, Keycloak JWT
+- **Data & Storage**: Spring Data JPA, Hibernate, PostgreSQL, Redis, MinIO
+- **Messaging & Event Streaming**: WebSocket, STOMP, Apache Kafka
+- **Observability**: Micrometer, Brave, Prometheus, Grafana, Zipkin, ELK Stack (Elasticsearch, Logstash, Kibana)
+- **DevOps**: Docker, Docker Compose, Maven
+
+---
+
+## 📄 License
+
+This project is developed for educational and professional enterprise architecture demonstration purposes.
