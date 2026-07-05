@@ -1,5 +1,21 @@
 # ZChat - Enterprise Microservices Chat Platform
 
+<div align="center">
+
+![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
+![Spring Cloud](https://img.shields.io/badge/Spring_Cloud-2025.0-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
+![Keycloak](https://img.shields.io/badge/Keycloak-26-008090?style=for-the-badge&logo=keycloak&logoColor=white)
+![Apache Kafka](https://img.shields.io/badge/Apache_Kafka-7.8-231F20?style=for-the-badge&logo=apachekafka&logoColor=white)
+![Elasticsearch](https://img.shields.io/badge/Elasticsearch-8.x-005571?style=for-the-badge&logo=elasticsearch&logoColor=white)
+![MinIO](https://img.shields.io/badge/MinIO-S3-C72C48?style=for-the-badge&logo=minio&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![Prometheus | Grafana | ELK](https://img.shields.io/badge/Observability-ELK_%7C_Prometheus_%7C_Grafana-F46800?style=for-the-badge)
+
+</div>
+
+---
+
 ZChat is a modern, real-time messaging platform built on a **Microservices** architecture powered by **Spring Boot 3** and **Spring Cloud**. Designed for high scalability, resilience, and cloud-native observability, ZChat provides seamless 1-on-1 and group communication with enterprise-grade monitoring and infrastructure.
 
 ---
