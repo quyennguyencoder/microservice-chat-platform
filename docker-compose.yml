@@ -65,6 +65,7 @@ services:
       retries: 10
     restart: unless-stopped
 
+
   minio:
     image: minio/minio:latest
     container_name: minio
@@ -111,23 +112,18 @@ services:
 
   # ==================== ENTERPRISE OBSERVABILITY STACK ====================
 
-  # 1. Trạm trung chuyển trung tâm OTel Collector
-  otel-collector:
-    image: otel/opentelemetry-collector-contrib:latest
-    container_name: otel-collector
-    command: ["--config=/etc/otel-collector-config.yml"]
+  # 1. Log Processing Pipeline (ELK Stack - Logstash)
+  logstash:
+    image: logstash:8.15.0
+    container_name: logstash
+    command: logstash -f /usr/share/logstash/pipeline/logstash.conf
     volumes:
-      - ./otel-collector-config.yml:/etc/otel-collector-config.yml
+      - ./logstash/pipeline:/usr/share/logstash/pipeline
     ports:
-      - "4317:4317" # OTLP gRPC receiver
-      - "4318:4318" # OTLP HTTP receiver
+      - "5000:5000"
     depends_on:
       elasticsearch:
         condition: service_healthy
-      zipkin:
-        condition: service_started
-      prometheus:
-        condition: service_started
     restart: unless-stopped
 
   # 2. Distributed Tracing UI
@@ -138,21 +134,21 @@ services:
       - "9411:9411"
     restart: unless-stopped
 
-  # 3. Metrics Storage (Bật tính năng Remote Write Receiver)
+  # 3. Metrics Storage (Scrape directly from Spring Boot microservices)
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
-      - "--web.enable-remote-write-receiver"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./alert.rules.yml:/etc/prometheus/alert.rules.yml
       - prometheus-data:/prometheus
     ports:
       - "9091:9090" # Tránh đụng Keycloak 9090
     restart: unless-stopped
 
-  # 4. Visualization Dashboard
+  # 4. Visualization Dashboard & Alerting
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
