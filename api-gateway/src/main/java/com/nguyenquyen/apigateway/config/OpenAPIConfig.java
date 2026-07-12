@@ -8,42 +8,10 @@ import org.springframework.context.annotation.Configuration;
 public class OpenAPIConfig {
 
     @Bean
-    public GroupedOpenApi userServiceApi() {
+    public GroupedOpenApi gatewayApi() {
         return GroupedOpenApi.builder()
-                .group("user-service")
-                .pathsToMatch("/user-service/**")
-                .build();
-    }
-
-    @Bean
-    public GroupedOpenApi chatServiceApi() {
-        return GroupedOpenApi.builder()
-                .group("chat-service")
-                .pathsToMatch("/chat-service/**")
-                .build();
-    }
-
-    @Bean
-    public GroupedOpenApi notificationServiceApi() {
-        return GroupedOpenApi.builder()
-                .group("notification-service")
-                .pathsToMatch("/notification-service/**")
-                .build();
-    }
-
-    @Bean
-    public GroupedOpenApi searchServiceApi() {
-        return GroupedOpenApi.builder()
-                .group("search-service")
-                .pathsToMatch("/search-service/**")
-                .build();
-    }
-
-    @Bean
-    public GroupedOpenApi storageServiceApi() {
-        return GroupedOpenApi.builder()
-                .group("storage-service")
-                .pathsToMatch("/storage-service/**")
+                .group("api-gateway")
+                .pathsToMatch("/fallback/**")
                 .build();
     }
 }

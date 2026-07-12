@@ -53,7 +53,7 @@ public class SecurityConfig {
                         .pathMatchers("/api/pins/public/**").permitAll()
                         .pathMatchers("/api/admin/**").hasRole("admin")
                         .pathMatchers("/actuator/**").permitAll()
-                        .pathMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/*/v3/api-docs/**").permitAll()
+                        .pathMatchers("/swagger-ui/**", "/swagger-ui.html", "/webjars/**", "/v3/api-docs/**", "/*/v3/api-docs/**", "/favicon.ico").permitAll()
                         .pathMatchers("/ws/**").permitAll()
                         .anyExchange().authenticated()
                 )
