@@ -1,9 +1,9 @@
 package com.nguyenquyen.chatservice.websocket;
 
+import com.nguyenquyen.chatservice.redis.RedisMessagePublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
@@ -19,7 +19,7 @@ import java.security.Principal;
 public class WebSocketEventListener {
 
     private final WebSocketSessionManager sessionManager;
-    private final SimpMessagingTemplate messagingTemplate;
+    private final RedisMessagePublisher redisMessagePublisher;
     private final ChatEventPublisher eventPublisher;
 
     @EventListener
@@ -49,7 +49,8 @@ public class WebSocketEventListener {
                 ? WsOutgoingMessage.userOnline(userId)
                 : WsOutgoingMessage.userOffline(userId);
 
-        messagingTemplate.convertAndSend("/topic/presence", message);
+        // Phát sóng trạng thái Online/Offline lên Redis để tất cả Server đều biết
+        redisMessagePublisher.broadcastPresence(message);
 
         eventPublisher.publish(ChatEvent.builder()
                 .type(online ? ChatEventType.USER_ONLINE.name() : ChatEventType.USER_OFFLINE.name())
