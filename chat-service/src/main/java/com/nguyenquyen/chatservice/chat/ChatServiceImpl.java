@@ -5,11 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import com.nguyenquyen.common.exception.BadRequestException;
 import com.nguyenquyen.common.exception.ResourceNotFoundException;
 import com.nguyenquyen.common.util.SecurityUtils;
 import com.nguyenquyen.chatservice.websocket.WsOutgoingMessage;
+import com.nguyenquyen.chatservice.redis.RedisMessagePublisher;
 
 import java.time.Instant;
 import java.util.List;
@@ -25,7 +25,7 @@ public class ChatServiceImpl implements ChatService {
     private final ChatMemberRepository chatMemberRepository;
     private final ChatMapper chatMapper;
     private final com.nguyenquyen.chatservice.kafka.ChatEventPublisher eventPublisher;
-    private final SimpMessagingTemplate messagingTemplate;
+    private final RedisMessagePublisher redisMessagePublisher;
 
     @Override
     public ChatResponse getOrCreatePrivateChat(String targetUserId) {
@@ -124,13 +124,13 @@ public class ChatServiceImpl implements ChatService {
 
         chat = chatRepository.save(chat);
         log.info("Group chat updated: {} by {}", chatId, currentUserId);
-        
+
         ChatResponse response = chatMapper.toResponse(chat, currentUserId);
-        
+
         // Broadcast GROUP_UPDATED via WebSocket
         WsOutgoingMessage wsMessage = WsOutgoingMessage.groupUpdated(chatId, response);
         chat.getMemberIds().forEach(memberId -> {
-            messagingTemplate.convertAndSend("/queue/chat/" + memberId, wsMessage);
+            redisMessagePublisher.sendToUser(memberId, wsMessage);
         });
 
         // Publish to Kafka (for offline notifications)
@@ -192,7 +192,7 @@ public class ChatServiceImpl implements ChatService {
         // Broadcast MEMBER_CHANGE via WebSocket
         WsOutgoingMessage wsMessage = WsOutgoingMessage.memberChange(chatId, currentUserId, request.memberIds());
         chat.getMemberIds().forEach(memberId -> {
-            messagingTemplate.convertAndSend("/queue/chat/" + memberId, wsMessage);
+            redisMessagePublisher.sendToUser(memberId, wsMessage);
         });
 
         return response;
@@ -230,10 +230,10 @@ public class ChatServiceImpl implements ChatService {
         // Broadcast MEMBER_CHANGE via WebSocket
         WsOutgoingMessage wsMessage = WsOutgoingMessage.memberChange(chatId, currentUserId, List.of(memberId));
         chat.getMemberIds().forEach(id -> {
-            messagingTemplate.convertAndSend("/queue/chat/" + id, wsMessage);
+            redisMessagePublisher.sendToUser(id, wsMessage);
         });
         // Also send to the removed member so their client knows they were removed
-        messagingTemplate.convertAndSend("/queue/chat/" + memberId, wsMessage);
+        redisMessagePublisher.sendToUser(memberId, wsMessage);
 
         log.info("Member {} removed from group chat {} by {}", memberId, chatId, currentUserId);
     }
@@ -258,16 +258,16 @@ public class ChatServiceImpl implements ChatService {
 
         ChatMember targetMember = getChatMember(chatId, targetUserId);
         targetMember.setRole(request.role());
-        
+
         chat = chatRepository.save(chat);
         log.info("Changed role of member {} to {} in group chat {} by {}", targetUserId, request.role(), chatId, currentUserId);
-        
+
         ChatResponse response = chatMapper.toResponse(chat, currentUserId);
 
         // Broadcast MEMBER_CHANGE via WebSocket
         WsOutgoingMessage wsMessage = WsOutgoingMessage.memberChange(chatId, currentUserId, List.of(targetUserId));
         chat.getMemberIds().forEach(id -> {
-            messagingTemplate.convertAndSend("/queue/chat/" + id, wsMessage);
+            redisMessagePublisher.sendToUser(id, wsMessage);
         });
 
         // Publish to Kafka
@@ -291,7 +291,7 @@ public class ChatServiceImpl implements ChatService {
         }
 
         ChatMember currentMember = getChatMember(chatId, currentUserId);
-        
+
         if (currentMember.getRole() == ChatMemberRole.OWNER) {
             throw new BadRequestException("OWNER cannot leave the group. Transfer ownership or delete the group.");
         }
@@ -302,9 +302,9 @@ public class ChatServiceImpl implements ChatService {
         // Broadcast MEMBER_CHANGE via WebSocket
         WsOutgoingMessage wsMessage = WsOutgoingMessage.memberChange(chatId, currentUserId, List.of(currentUserId));
         chat.getMemberIds().forEach(id -> {
-            messagingTemplate.convertAndSend("/queue/chat/" + id, wsMessage);
+            redisMessagePublisher.sendToUser(id, wsMessage);
         });
-        messagingTemplate.convertAndSend("/queue/chat/" + currentUserId, wsMessage);
+        redisMessagePublisher.sendToUser(currentUserId, wsMessage);
 
         log.info("User {} left group chat {}", currentUserId, chatId);
     }
@@ -322,11 +322,11 @@ public class ChatServiceImpl implements ChatService {
     public ChatResponse getChatById(UUID chatId) {
         String currentUserId = SecurityUtils.requireCurrentUserId();
         Chat chat = getChatEntityById(chatId);
-        
+
         if (chat.isNotMember(currentUserId)) {
              throw new AccessDeniedException("You are not a participant of this chat");
         }
-        
+
         return chatMapper.toResponse(chat, currentUserId);
     }
 

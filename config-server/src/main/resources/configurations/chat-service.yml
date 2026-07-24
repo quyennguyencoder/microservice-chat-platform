@@ -35,7 +35,7 @@ spring:
 presence:
   heartbeat-interval-seconds: 30
   offline-threshold-seconds: 60
-  typing-timeout-seconds: 3
+  typing-timeout-seconds: 6
 
 # Kafka topics
 kafka:

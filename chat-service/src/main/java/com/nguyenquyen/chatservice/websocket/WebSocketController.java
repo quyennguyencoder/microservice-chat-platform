@@ -1,10 +1,10 @@
 package com.nguyenquyen.chatservice.websocket;
 
+import com.nguyenquyen.chatservice.redis.RedisMessagePublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import com.nguyenquyen.chatservice.chat.Chat;
 import com.nguyenquyen.chatservice.chat.ChatService;
@@ -22,11 +22,10 @@ import java.util.UUID;
 @Slf4j
 public class WebSocketController {
 
-    private final SimpMessagingTemplate messagingTemplate;
     private final MessageService messageService;
     private final ChatService chatService;
     private final PresenceService presenceService;
-    private final WebSocketSessionManager sessionManager;
+    private final RedisMessagePublisher redisMessagePublisher;
 
     @MessageMapping("/chat")
     public void handleMessage(@Payload WsIncomingMessage incoming, Principal principal) {
@@ -80,7 +79,7 @@ public class WebSocketController {
 
         WsOutgoingMessage outgoing = WsOutgoingMessage.newMessage(message);
 
-        // Send to sender
+        // Gửi qua Redis Pub/Sub cho người gửi (để hiển thị tick đã gửi)
         sendToUser(userId, outgoing);
 
         Chat chat = chatService.getChatEntityById(chatId);
@@ -89,9 +88,10 @@ public class WebSocketController {
                 .toList();
 
         for (String recipientId : recipients) {
-            if (sessionManager.isUserOnline(recipientId)) {
+            if (presenceService.isUserOnline(recipientId)) {
+                // Đẩy thông báo có tin nhắn mới vào Redis thay vì gửi nội bộ
                 sendToUser(recipientId, outgoing);
-                log.info("Message sent to recipient {} via WebSocket", recipientId);
+                log.info("Message sent to recipient {} via Redis Pub/Sub", recipientId);
             } else {
                 log.info("Recipient {} is offline, message will be delivered via Kafka by MessageService", recipientId);
             }
@@ -108,7 +108,7 @@ public class WebSocketController {
 
         chat.getMemberIds().stream()
                 .filter(id -> !id.equals(userId))
-                .filter(sessionManager::isUserOnline)
+                .filter(presenceService::isUserOnline)
                 .forEach(recipientId -> sendToUser(recipientId, typingMessage));
     }
 
@@ -122,7 +122,7 @@ public class WebSocketController {
 
         chat.getMemberIds().stream()
                 .filter(id -> !id.equals(userId))
-                .filter(sessionManager::isUserOnline)
+                .filter(presenceService::isUserOnline)
                 .forEach(recipientId -> sendToUser(recipientId, stopTypingMessage));
     }
 
@@ -142,7 +142,7 @@ public class WebSocketController {
 
             chat.getMemberIds().stream()
                 .filter(id -> !id.equals(userId))
-                .filter(sessionManager::isUserOnline)
+                .filter(presenceService::isUserOnline)
                 .forEach(recipientId -> {
                     sendToUser(recipientId, readMessage);
                     log.debug("Sent MESSAGES_READ notification to {}", recipientId);
@@ -156,7 +156,6 @@ public class WebSocketController {
             return;
         }
 
-        sessionManager.joinChat(userId, chatId);
         presenceService.setActiveChat(userId, chatId);
 
         log.debug("User {} joined chat {}", userId, chatId);
@@ -170,7 +169,6 @@ public class WebSocketController {
             return;
         }
 
-        sessionManager.leaveChat(userId, chatId);
         presenceService.removeActiveChat(userId);
         presenceService.stopTyping(userId, chatId);
 
@@ -184,6 +182,7 @@ public class WebSocketController {
 
     private void sendToUser(String userId, WsOutgoingMessage message) {
         log.debug("Sending to user {}: {}", userId, message.getType());
-        messagingTemplate.convertAndSend("/queue/chat/" + userId, message);
+        // Delegate việc gửi tin nhắn thực tế cho RedisMessagePublisher
+        redisMessagePublisher.sendToUser(userId, message);
     }
 }
