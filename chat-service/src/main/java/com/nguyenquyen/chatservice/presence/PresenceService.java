@@ -28,7 +28,7 @@ public class PresenceService {
     @Value("${presence.online-threshold-seconds:60}")
     private int onlineThresholdSeconds;
 
-    @Value("${presence.typing-timeout-seconds:3}")
+    @Value("${presence.typing-timeout-seconds:6}")
     private int typingTimeoutSeconds;
 
     public void updatePresence(String userId) {
