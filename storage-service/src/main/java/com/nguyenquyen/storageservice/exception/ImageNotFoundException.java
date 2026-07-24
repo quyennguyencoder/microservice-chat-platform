@@ -1,6 +1,8 @@
 package com.nguyenquyen.storageservice.exception;
 
-public class ImageNotFoundException extends RuntimeException {
+import com.nguyenquyen.common.exception.ResourceNotFoundException;
+
+public class ImageNotFoundException extends ResourceNotFoundException {
 
     public ImageNotFoundException(String message) {
         super(message);

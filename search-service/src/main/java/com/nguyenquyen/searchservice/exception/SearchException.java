@@ -1,6 +1,8 @@
 package com.nguyenquyen.searchservice.exception;
 
-public class SearchException extends RuntimeException {
+import com.nguyenquyen.common.exception.BadRequestException;
+
+public class SearchException extends BadRequestException {
 
     public SearchException(String message) {
         super(message);

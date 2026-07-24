@@ -1,6 +1,8 @@
 package com.nguyenquyen.searchservice.exception;
 
-public class IndexingException extends RuntimeException {
+import com.nguyenquyen.common.exception.BadRequestException;
+
+public class IndexingException extends BadRequestException {
 
     public IndexingException(String message) {
         super(message);

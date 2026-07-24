@@ -1,6 +1,8 @@
 package com.nguyenquyen.storageservice.exception;
 
-public class ImageStorageException extends RuntimeException {
+import com.nguyenquyen.common.exception.BadRequestException;
+
+public class ImageStorageException extends BadRequestException {
 
     public ImageStorageException(String message) {
         super(message);
