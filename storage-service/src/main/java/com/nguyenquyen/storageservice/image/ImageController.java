@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.nguyenquyen.common.dto.response.ApiResponse;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -21,29 +22,29 @@ public class ImageController {
     private final ImageService imageService;
 
     @PostMapping("/presigned-upload")
-    public ResponseEntity<PresignedUploadResponse> getPresignedUploadUrl(
+    public ResponseEntity<ApiResponse<PresignedUploadResponse>> getPresignedUploadUrl(
             @Valid @RequestBody PresignedUploadRequest request) {
         log.info("Generating presigned upload URL for: {}", request.getFileName());
-        return ResponseEntity.ok(imageService.generatePresignedUploadUrl(request));
+        return ResponseEntity.ok(ApiResponse.success(imageService.generatePresignedUploadUrl(request)));
     }
 
     @PostMapping("/confirm")
-    public ResponseEntity<ConfirmUploadResponse> confirmUpload(
+    public ResponseEntity<ApiResponse<ConfirmUploadResponse>> confirmUpload(
             @Valid @RequestBody ConfirmUploadRequest request) {
         log.info("Confirming upload for imageId: {}", request.getImageId());
-        return ResponseEntity.ok(imageService.confirmUpload(request));
+        return ResponseEntity.ok(ApiResponse.success(imageService.confirmUpload(request)));
     }
 
     @GetMapping("/{imageId}/url")
-    public ResponseEntity<ImageUrlResponse> getImageUrl(
+    public ResponseEntity<ApiResponse<ImageUrlResponse>> getImageUrl(
             @PathVariable String imageId,
             @RequestParam(value = "expiry", required = false) Integer expirySeconds) {
-        return ResponseEntity.ok(imageService.getImageUrl(imageId, expirySeconds));
+        return ResponseEntity.ok(ApiResponse.success(imageService.getImageUrl(imageId, expirySeconds)));
     }
 
     @GetMapping("/{imageId}/metadata")
-    public ResponseEntity<ImageMetadata> getImageMetadata(@PathVariable String imageId) {
-        return ResponseEntity.ok(imageService.getImageMetadata(imageId));
+    public ResponseEntity<ApiResponse<ImageMetadata>> getImageMetadata(@PathVariable String imageId) {
+        return ResponseEntity.ok(ApiResponse.success(imageService.getImageMetadata(imageId)));
     }
 
     @GetMapping("/{imageId}")
@@ -71,15 +72,15 @@ public class ImageController {
     }
 
     @DeleteMapping("/{imageId}")
-    public ResponseEntity<Void> deleteImage(@PathVariable String imageId) {
+    public ResponseEntity<ApiResponse<Void>> deleteImage(@PathVariable String imageId) {
         log.info("Deleting image: {}", imageId);
         imageService.deleteImage(imageId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 
     @GetMapping("/list")
-    public ResponseEntity<List<ImageMetadata>> listImages(
+    public ResponseEntity<ApiResponse<List<ImageMetadata>>> listImages(
             @RequestParam(value = "category", required = false) String category) {
-        return ResponseEntity.ok(imageService.listImagesByCategory(category));
+        return ResponseEntity.ok(ApiResponse.success(imageService.listImagesByCategory(category)));
     }
 }

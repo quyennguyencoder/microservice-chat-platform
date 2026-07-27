@@ -43,7 +43,6 @@ public class Image {
     @Column(nullable = false, length = 20)
     private ImageStatus status;
 
-    private String thumbnailImageId;
 
     @Column(nullable = false)
     private Integer width;

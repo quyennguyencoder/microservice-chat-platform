@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
+import com.nguyenquyen.common.dto.response.ApiResponse;
 
 @Slf4j
 @Component
@@ -15,9 +16,9 @@ public class UserServiceClientFallbackFactory implements FallbackFactory<UserSer
     public UserServiceClient create(Throwable cause) {
         return new UserServiceClient() {
             @Override
-            public List<FriendshipResponse> getFriends() {
+            public ApiResponse<List<FriendshipResponse>> getFriends() {
                 log.error("Failed to fetch friends from user-service, returning empty list", cause);
-                return Collections.emptyList();
+                return ApiResponse.success(Collections.emptyList());
             }
         };
     }

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import com.nguyenquyen.common.constant.RedisConstants;
 
 @Service
 @RequiredArgsConstructor
@@ -12,7 +13,7 @@ public class UnreadCounterService {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    private static final String UNREAD_COUNT_KEY_PREFIX = "notification:unread:";
+    private static final String UNREAD_COUNT_KEY_PREFIX = RedisConstants.UNREAD_COUNT_KEY_PREFIX;
 
     public void increment(String userId) {
         String key = UNREAD_COUNT_KEY_PREFIX + userId;
@@ -22,12 +23,12 @@ public class UnreadCounterService {
 
     public void decrement(String userId, int count) {
         String key = UNREAD_COUNT_KEY_PREFIX + userId;
-        Long current = getCount(userId);
-        if (current != null && current > 0) {
-            long newValue = Math.max(0, current - count);
-            redisTemplate.opsForValue().set(key, newValue);
-            log.debug("Unread counter decremented for user {}: {} -> {}", userId, current, newValue);
+        Long newValue = redisTemplate.opsForValue().increment(key, -count);
+        if (newValue != null && newValue < 0) {
+            redisTemplate.opsForValue().set(key, 0L);
+            newValue = 0L;
         }
+        log.debug("Unread counter decremented for user {}: new value -> {}", userId, newValue);
     }
 
     public void reset(String userId) {
