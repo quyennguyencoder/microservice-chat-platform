@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.nguyenquyen.common.dto.response.ApiResponse;
 import com.nguyenquyen.searchservice.search.SearchCriteria;
 import com.nguyenquyen.searchservice.search.SearchResult;
 
@@ -15,7 +16,7 @@ public class MessageSearchController {
     private final MessageSearchService messageSearchService;
 
     @GetMapping
-    public ResponseEntity<SearchResult<MessageSearchResult>> searchMessages(
+    public ResponseEntity<ApiResponse<SearchResult<MessageSearchResult>>> searchMessages(
             @RequestParam String q,
             @RequestParam(required = false) java.util.UUID chatId,
             @RequestParam(defaultValue = "RELEVANCE") SearchCriteria.SortBy sortBy,
@@ -37,6 +38,6 @@ public class MessageSearchController {
                 .highlight(highlight)
                 .build();
 
-        return ResponseEntity.ok(messageSearchService.searchMessages(criteria));
+        return ResponseEntity.ok(ApiResponse.success(messageSearchService.searchMessages(criteria)));
     }
 }

@@ -13,5 +13,4 @@ public class MinioProperties {
     private String accessKey;
     private String secretKey;
     private String bucketName;
-    private String thumbnailBucket;
 }

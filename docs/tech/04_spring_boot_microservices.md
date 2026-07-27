@@ -41,7 +41,7 @@ Hệ thống ZChat được xây dựng trên nền tảng **Java 21 (LTS)** và
 6. **`chat-service` (Cổng 8082):** Quản lý phòng chat, lịch sử tin nhắn, và kết nối STOMP WebSocket. Sử dụng PostgreSQL + Redis (Presence/Typing).
 7. **`notification-service` (Cổng 8083):** Quản lý thông báo, bộ đếm chưa đọc (`Unread Counter`). Sử dụng Redis + PostgreSQL.
 8. **`search-service` (Cổng 8084):** Bộ máy tìm kiếm tốc độ cao cho người dùng và lịch sử tin nhắn. Sử dụng Elasticsearch.
-9. **`storage-service` (Cổng 8085):** Xử lý tải lên/tải xuống hình ảnh, avatar, banner và tạo ảnh thu nhỏ (`Thumbnails`). Sử dụng MinIO (S3-Compatible Object Storage).
+9. **`storage-service` (Cổng 8085):** Xử lý tải lên/tải xuống hình ảnh, avatar, banner. Sử dụng MinIO (S3-Compatible Object Storage).
 
 ---
 

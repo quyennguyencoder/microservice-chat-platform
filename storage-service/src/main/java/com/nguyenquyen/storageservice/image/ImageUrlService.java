@@ -7,7 +7,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import com.nguyenquyen.storageservice.exception.ImageStorageException;
+import com.nguyenquyen.common.exception.AppException;
+import com.nguyenquyen.common.exception.ErrorCode;
 
 import java.util.concurrent.TimeUnit;
 
@@ -36,7 +37,7 @@ public class ImageUrlService {
             );
         } catch (Exception e) {
             log.error("Failed to generate presigned PUT URL", e);
-            throw new ImageStorageException("Failed to generate upload URL", e);
+            throw new AppException(ErrorCode.IMAGE_STORAGE_ERROR, "Failed to generate upload URL", e);
         }
     }
 
@@ -56,7 +57,7 @@ public class ImageUrlService {
             );
         } catch (Exception e) {
             log.error("Failed to generate presigned GET URL", e);
-            throw new ImageStorageException("Failed to generate download URL", e);
+            throw new AppException(ErrorCode.IMAGE_STORAGE_ERROR, "Failed to generate download URL", e);
         }
     }
 

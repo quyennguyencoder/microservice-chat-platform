@@ -1,11 +1,15 @@
 package com.nguyenquyen.storageservice.image;
 
 import io.minio.MinioClient;
-import io.minio.RemoveObjectArgs;
+import io.minio.RemoveObjectsArgs;
+import io.minio.Result;
+import io.minio.messages.DeleteError;
+import io.minio.messages.DeleteObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -35,61 +41,49 @@ public class ImageCleanupScheduler {
     public void cleanupExpiredPendingUploads() {
         Instant threshold = Instant.now().minus(pendingExpiryHours, ChronoUnit.HOURS);
 
+        // Fetch up to 1000 records at a time to prevent OOM
         List<Image> expiredRecords = imageRepository
-                .findExpiredPendingUploads(Image.ImageStatus.PENDING, threshold);
+                .findExpiredPendingUploads(Image.ImageStatus.PENDING, threshold, PageRequest.of(0, 1000));
 
         if (expiredRecords.isEmpty()) {
             log.debug("No expired pending uploads found");
             return;
         }
 
-        log.info("Found {} expired pending uploads to cleanup", expiredRecords.size());
+        log.info("Found {} expired pending uploads to cleanup in this batch", expiredRecords.size());
 
-        int cleaned = 0;
+        // Group by bucket to do bulk delete safely
+        Map<String, List<Image>> recordsByBucket = expiredRecords.stream()
+                .collect(Collectors.groupingBy(Image::getBucketName));
+
+        for (Map.Entry<String, List<Image>> entry : recordsByBucket.entrySet()) {
+            String bucket = entry.getKey();
+            List<Image> records = entry.getValue();
+
+            List<DeleteObject> objects = records.stream()
+                    .map(img -> new DeleteObject(img.getObjectName()))
+                    .collect(Collectors.toList());
+
+            try {
+                Iterable<Result<DeleteError>> results = minioClient.removeObjects(
+                        RemoveObjectsArgs.builder().bucket(bucket).objects(objects).build()
+                );
+                
+                // Need to iterate results to actually execute the removal (lazy evaluated in MinIO SDK)
+                for (Result<DeleteError> result : results) {
+                    DeleteError error = result.get();
+                    log.error("Failed to delete object {}: {}", error.objectName(), error.message());
+                }
+            } catch (Exception e) {
+                log.error("Failed to bulk remove objects from bucket {}", bucket, e);
+            }
+        }
+
         for (Image record : expiredRecords) {
-            if (processExpiredRecord(record)) {
-                cleaned++;
-            }
-        }
-
-        log.info("Cleanup completed. Processed: {}/{}", cleaned, expiredRecords.size());
-    }
-
-    private boolean processExpiredRecord(Image record) {
-        try {
-            tryRemoveFromMinio(record.getBucketName(), record.getObjectName());
-
-            if (record.getThumbnailImageId() != null) {
-                imageRepository.findById(record.getThumbnailImageId())
-                        .ifPresent(thumb -> {
-                            tryRemoveFromMinio(thumb.getBucketName(), thumb.getObjectName());
-                            thumb.setStatus(Image.ImageStatus.EXPIRED);
-                            imageRepository.save(thumb);
-                        });
-            }
-
             record.setStatus(Image.ImageStatus.EXPIRED);
-            imageRepository.save(record);
-
-            log.debug("Expired record cleaned: {}", record.getId());
-            return true;
-
-        } catch (Exception e) {
-            log.error("Failed to cleanup expired record: {}", record.getId(), e);
-            return false;
         }
-    }
 
-    private void tryRemoveFromMinio(String bucket, String objectName) {
-        try {
-            minioClient.removeObject(
-                    RemoveObjectArgs.builder()
-                            .bucket(bucket)
-                            .object(objectName)
-                            .build()
-            );
-        } catch (Exception e) {
-            log.debug("Object not found or already removed: {}/{}", bucket, objectName);
-        }
+        imageRepository.saveAll(expiredRecords);
+        log.info("Cleanup completed for batch of {}", expiredRecords.size());
     }
 }

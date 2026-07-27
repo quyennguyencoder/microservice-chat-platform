@@ -12,8 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import com.nguyenquyen.searchservice.exception.IndexingException;
-import com.nguyenquyen.searchservice.exception.SearchException;
+import com.nguyenquyen.common.exception.AppException;
+import com.nguyenquyen.common.exception.ErrorCode;
 import com.nguyenquyen.searchservice.search.SearchCriteria;
 import com.nguyenquyen.searchservice.search.SearchResult;
 import com.nguyenquyen.searchservice.search.SearchResultBuilder;
@@ -46,7 +46,7 @@ public class MessageSearchServiceImpl implements MessageSearchService {
             );
             log.debug("Indexed message: {}", message.getMessageId());
         } catch (IOException e) {
-            throw new IndexingException("Failed to index message: " + message.getMessageId(), e);
+            throw new AppException(ErrorCode.INDEXING_ERROR, "Failed to index message: " + message.getMessageId(), e);
         }
     }
 
@@ -59,7 +59,7 @@ public class MessageSearchServiceImpl implements MessageSearchService {
             );
             log.debug("Deleted message: {}", messageId);
         } catch (IOException e) {
-            throw new IndexingException("Failed to delete message: " + messageId, e);
+            throw new AppException(ErrorCode.INDEXING_ERROR, "Failed to delete message: " + messageId, e);
         }
     }
 
@@ -70,7 +70,9 @@ public class MessageSearchServiceImpl implements MessageSearchService {
         if (criteria.getChatId() == null) {
             // Global message search: fetch all chat IDs the user is part of
             try {
-                userChatIds = chatServiceClient.getMyChats().stream()
+                var chatsResponse = chatServiceClient.getMyChats().getResult();
+                userChatIds = (chatsResponse == null ? java.util.Collections.<com.nguyenquyen.searchservice.client.ChatResponse>emptyList() : chatsResponse)
+                        .stream()
                         .map(com.nguyenquyen.searchservice.client.ChatResponse::id)
                         .toList();
                 
@@ -86,7 +88,7 @@ public class MessageSearchServiceImpl implements MessageSearchService {
                 }
             } catch (Exception e) {
                 log.warn("Failed to fetch user chats for global search: {}", e.getMessage());
-                throw new SearchException("Failed to fetch user chats", e);
+                throw new AppException(ErrorCode.SEARCH_ERROR, "Failed to fetch user chats", e);
             }
         } else {
             // Verify membership for specific chat
@@ -94,7 +96,7 @@ public class MessageSearchServiceImpl implements MessageSearchService {
                 chatServiceClient.getChatById(criteria.getChatId());
             } catch (feign.FeignException e) {
                 log.warn("Access denied or chat not found for chat {}: {}", criteria.getChatId(), e.getMessage());
-                throw new SearchException("Access denied or chat not found", e);
+                throw new AppException(ErrorCode.SEARCH_ERROR, "Access denied or chat not found", e);
             }
         }
 
@@ -160,7 +162,7 @@ public class MessageSearchServiceImpl implements MessageSearchService {
             );
 
         } catch (IOException e) {
-            throw new SearchException("Failed to execute message search", e);
+            throw new AppException(ErrorCode.SEARCH_ERROR, "Failed to execute message search", e);
         }
     }
 

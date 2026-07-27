@@ -8,13 +8,16 @@ import com.nguyenquyen.searchservice.config.FeignConfig;
 
 import java.util.List;
 import java.util.UUID;
+import com.nguyenquyen.common.dto.response.ApiResponse;
+import com.nguyenquyen.common.constant.RedisConstants;
 
 @FeignClient(name = "chat-service", configuration = FeignConfig.class, fallbackFactory = ChatServiceClientFallbackFactory.class)
 public interface ChatServiceClient {
 
     @GetMapping("/api/v1/chats/{chatId}")
-    void getChatById(@PathVariable("chatId") UUID chatId);
+    ApiResponse<ChatResponse> getChatById(@PathVariable("chatId") UUID chatId);
 
+    @org.springframework.cache.annotation.Cacheable(value = RedisConstants.MY_CHATS_CACHE, key = "T(com.nguyenquyen.common.util.SecurityUtils).requireCurrentUserId()")
     @GetMapping("/api/v1/chats")
-    List<ChatResponse> getMyChats();
+    ApiResponse<List<ChatResponse>> getMyChats();
 }

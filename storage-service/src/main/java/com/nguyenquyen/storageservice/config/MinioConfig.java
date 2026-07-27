@@ -32,11 +32,6 @@ public class MinioConfig {
 
             createBucketIfNotExists(client, minioProperties.getBucketName());
 
-            if (minioProperties.getThumbnailBucket() != null
-                    && !minioProperties.getThumbnailBucket().isEmpty()) {
-                createBucketIfNotExists(client, minioProperties.getThumbnailBucket());
-            }
-
             log.info("MinIO buckets initialized successfully");
         } catch (Exception e) {
             log.error("Error initializing MinIO buckets", e);

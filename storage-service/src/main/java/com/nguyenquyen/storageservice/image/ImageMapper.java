@@ -17,10 +17,9 @@ public interface ImageMapper {
     @Mapping(target = "contentType", source = "request.contentType")
     @Mapping(target = "fileSize", source = "request.fileSize")
     @Mapping(target = "category", source = "request.category")
-    @Mapping(target = "width", source = "request.originalWidth")
-    @Mapping(target = "height", source = "request.originalHeight")
+    @Mapping(target = "width", source = "request.width")
+    @Mapping(target = "height", source = "request.height")
     @Mapping(target = "status", constant = "PENDING")
-    @Mapping(target = "thumbnailImageId", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "confirmedAt", ignore = true)
@@ -28,7 +27,8 @@ public interface ImageMapper {
 
     @Mapping(target = "imageId", source = "id")
     @Mapping(target = "size", source = "fileSize")
-    @Mapping(target = "etag", ignore = true)
+    @Mapping(target = "width", source = "width")
+    @Mapping(target = "height", source = "height")
     ImageMetadata toMetadata(Image image);
 
     List<ImageMetadata> toMetadataList(List<Image> images);
@@ -36,16 +36,11 @@ public interface ImageMapper {
     @Mapping(target = "imageId", source = "image.id")
     @Mapping(target = "size", source = "image.fileSize")
     @Mapping(target = "confirmed", expression = "java(image.isConfirmed())")
-    @Mapping(target = "originalWidth", source = "image.width")
-    @Mapping(target = "originalHeight", source = "image.height")
-    @Mapping(target = "thumbnailWidth", source = "thumbnailWidth")
-    @Mapping(target = "thumbnailHeight", source = "thumbnailHeight")
+    @Mapping(target = "width", source = "image.width")
+    @Mapping(target = "height", source = "image.height")
     ConfirmUploadResponse toConfirmResponse(
             Image image,
-            String imageUrl,
-            String thumbnailUrl,
-            Integer thumbnailWidth,
-            Integer thumbnailHeight
+            String imageUrl
     );
 
     default PresignedUploadResponse toPresignedResponse(
@@ -53,22 +48,16 @@ public interface ImageMapper {
             String uploadUrl,
             long expiresAt,
             Map<String, String> requiredHeaders,
-            String thumbnailImageId,
-            Integer originalWidth,
-            Integer originalHeight,
-            Integer thumbnailWidth,
-            Integer thumbnailHeight
+            Integer width,
+            Integer height
     ) {
         return PresignedUploadResponse.builder()
                 .imageId(imageId)
                 .uploadUrl(uploadUrl)
                 .expiresAt(expiresAt)
                 .requiredHeaders(requiredHeaders)
-                .thumbnailImageId(thumbnailImageId)
-                .originalWidth(originalWidth)
-                .originalHeight(originalHeight)
-                .thumbnailWidth(thumbnailWidth)
-                .thumbnailHeight(thumbnailHeight)
+                .width(width)
+                .height(height)
                 .build();
     }
 

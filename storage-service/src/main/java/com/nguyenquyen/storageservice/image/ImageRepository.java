@@ -23,9 +23,8 @@ public interface ImageRepository extends JpaRepository<Image, String> {
     @Query("SELECT i FROM Image i WHERE i.status = :status AND i.createdAt < :threshold")
     List<Image> findExpiredPendingUploads(
             @Param("status") Image.ImageStatus status,
-            @Param("threshold") Instant threshold
+            @Param("threshold") Instant threshold,
+            org.springframework.data.domain.Pageable pageable
     );
 
-    @Query("SELECT i FROM Image i WHERE i.thumbnailImageId = :thumbnailId")
-    Optional<Image> findByThumbnailImageId(@Param("thumbnailId") String thumbnailId);
 }

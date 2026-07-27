@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.nguyenquyen.common.dto.response.ApiResponse;
 import com.nguyenquyen.searchservice.search.SearchCriteria;
 import com.nguyenquyen.searchservice.search.SearchResult;
 
@@ -18,7 +19,7 @@ public class UserSearchController {
     private final UserSearchService userSearchService;
 
     @GetMapping
-    public ResponseEntity<SearchResult<UserSearchResult>> searchUsers(
+    public ResponseEntity<ApiResponse<SearchResult<UserSearchResult>>> searchUsers(
             @RequestParam String q,
             @RequestParam(defaultValue = "RELEVANCE") SearchCriteria.SortBy sortBy,
             @RequestParam(defaultValue = "DESC") SearchCriteria.SortOrder sortOrder,
@@ -41,6 +42,6 @@ public class UserSearchController {
 
         log.debug("User search: query='{}', page={}, size={}", q, page, size);
 
-        return ResponseEntity.ok(userSearchService.searchUsers(criteria));
+        return ResponseEntity.ok(ApiResponse.success(userSearchService.searchUsers(criteria)));
     }
 }

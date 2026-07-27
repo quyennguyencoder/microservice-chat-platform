@@ -7,7 +7,6 @@ CREATE TABLE image (
     file_size BIGINT,
     category VARCHAR(255),
     status VARCHAR(20) NOT NULL,
-    thumbnail_image_id VARCHAR(255),
     width INTEGER NOT NULL,
     height INTEGER NOT NULL,
     created_at TIMESTAMP NOT NULL,

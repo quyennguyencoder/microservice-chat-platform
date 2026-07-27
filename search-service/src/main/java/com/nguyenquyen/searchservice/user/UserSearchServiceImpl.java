@@ -13,8 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.nguyenquyen.searchservice.exception.IndexingException;
-import com.nguyenquyen.searchservice.exception.SearchException;
+import com.nguyenquyen.common.exception.AppException;
+import com.nguyenquyen.common.exception.ErrorCode;
 import com.nguyenquyen.common.kafka.event.UserEvent;
 import com.nguyenquyen.searchservice.search.SearchCriteria;
 import com.nguyenquyen.searchservice.search.SearchResult;
@@ -63,7 +63,7 @@ public class UserSearchServiceImpl implements UserSearchService {
             log.info("User indexed: id={}, username={}", document.getId(), document.getUsername());
         } catch (Exception e) {
             log.error("Failed to index user: {}", event.getUserId(), e);
-            throw new IndexingException("Failed to index user: " + event.getUserId(), e);
+            throw new AppException(ErrorCode.INDEXING_ERROR, "Failed to index user: " + event.getUserId(), e);
         }
     }
 
@@ -92,7 +92,7 @@ public class UserSearchServiceImpl implements UserSearchService {
 
         } catch (Exception e) {
             log.error("Failed to update user: {}", event.getUserId(), e);
-            throw new IndexingException("Failed to update user: " + event.getUserId(), e);
+            throw new AppException(ErrorCode.INDEXING_ERROR, "Failed to update user: " + event.getUserId(), e);
         }
     }
 
@@ -106,7 +106,7 @@ public class UserSearchServiceImpl implements UserSearchService {
             log.info("User deleted from index: {}", userId);
         } catch (Exception e) {
             log.error("Failed to delete user: {}", userId, e);
-            throw new IndexingException("Failed to delete user: " + userId, e);
+            throw new AppException(ErrorCode.INDEXING_ERROR, "Failed to delete user: " + userId, e);
         }
     }
 
@@ -193,7 +193,7 @@ public class UserSearchServiceImpl implements UserSearchService {
 
         } catch (Exception e) {
             log.error("User search failed: query='{}'", criteria.getQuery(), e);
-            throw new SearchException("Search failed: " + e.getMessage(), e);
+            throw new AppException(ErrorCode.SEARCH_ERROR, "Search failed: " + e.getMessage(), e);
         }
     }
 
@@ -230,7 +230,7 @@ public class UserSearchServiceImpl implements UserSearchService {
             return new InternalSearchResult<>(results, totalHits);
 
         } catch (IOException e) {
-            throw new SearchException("Failed to search users", e);
+            throw new AppException(ErrorCode.SEARCH_ERROR, "Failed to search users", e);
         }
     }
 
@@ -259,8 +259,8 @@ public class UserSearchServiceImpl implements UserSearchService {
         }
 
         if (Boolean.TRUE.equals(criteria.getFriendsOnly())) {
-            List<FriendshipResponse> friends = userServiceClient.getFriends();
-            if (friends.isEmpty()) {
+            List<FriendshipResponse> friends = userServiceClient.getFriends().getResult();
+            if (friends == null || friends.isEmpty()) {
                 // If user has no friends, return no results
                 boolBuilder.filter(f -> f.term(t -> t.field("_id").value("no_friends_match")));
             } else {
