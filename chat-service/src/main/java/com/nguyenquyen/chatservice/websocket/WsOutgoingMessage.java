@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import com.nguyenquyen.chatservice.message.MessageResponse;
+import com.nguyenquyen.chatservice.message.dto.MessageResponse;
 
 import java.time.Instant;
 import java.util.UUID;

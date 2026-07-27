@@ -1,8 +1,10 @@
 package com.nguyenquyen.chatservice.presence;
 
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.nguyenquyen.common.dto.response.ApiResponse;
 
 import java.util.Set;
 
@@ -14,19 +16,19 @@ public class PresenceController {
     private final PresenceService presenceService;
 
     @GetMapping
-    public ResponseEntity<UserPresenceResponse> getPresenceData(
+    public ResponseEntity<ApiResponse<UserPresenceResponse>> getPresenceData(
             @RequestParam Set<String> userIds) {
-        return ResponseEntity.ok(presenceService.getPresenceData(userIds));
+        return ResponseEntity.ok(ApiResponse.success(presenceService.getPresenceData(userIds)));
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<UserPresenceResponse.UserPresence> getUserPresence(
+    public ResponseEntity<ApiResponse<UserPresenceResponse.UserPresence>> getUserPresence(
             @PathVariable String userId) {
-        return ResponseEntity.ok(presenceService.getUserPresence(userId));
+        return ResponseEntity.ok(ApiResponse.success(presenceService.getUserPresence(userId)));
     }
 
     @GetMapping("/{userId}/online")
-    public ResponseEntity<Boolean> isUserOnline(@PathVariable String userId) {
-        return ResponseEntity.ok(presenceService.isUserOnline(userId));
+    public ResponseEntity<ApiResponse<Boolean>> isUserOnline(@PathVariable String userId) {
+        return ResponseEntity.ok(ApiResponse.success(presenceService.isUserOnline(userId)));
     }
 }

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
+import com.nguyenquyen.common.constant.RedisConstants;
 
 @Service
 @RequiredArgsConstructor
@@ -17,8 +18,8 @@ public class RedisMessagePublisher {
     @Value("${spring.application.name:chat-service}")
     private String serverId;
 
-    public static final String CHAT_CHANNEL = "ws-chat-channel";
-    public static final String PRESENCE_CHANNEL = "ws-presence-channel";
+    public static final String CHAT_CHANNEL = RedisConstants.CHAT_CHANNEL;
+    public static final String PRESENCE_CHANNEL = RedisConstants.PRESENCE_CHANNEL;
 
     /**
      * Gửi tin nhắn cho một người dùng cụ thể thông qua Redis Pub/Sub

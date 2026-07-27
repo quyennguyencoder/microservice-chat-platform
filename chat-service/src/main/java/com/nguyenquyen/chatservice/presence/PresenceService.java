@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
+import com.nguyenquyen.common.constant.RedisConstants;
 
 @Service
 @RequiredArgsConstructor
@@ -20,10 +21,10 @@ public class PresenceService {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    private static final String PRESENCE_KEY_PREFIX = "presence:user:";
-    private static final String LAST_SEEN_KEY_PREFIX = "lastseen:user:";
-    private static final String ACTIVE_CHAT_KEY_PREFIX = "active-chat:user:";
-    private static final String TYPING_KEY_PREFIX = "typing:chat:";
+    private static final String PRESENCE_KEY_PREFIX = RedisConstants.PRESENCE_KEY_PREFIX;
+    private static final String LAST_SEEN_KEY_PREFIX = RedisConstants.LAST_SEEN_KEY_PREFIX;
+    private static final String ACTIVE_CHAT_KEY_PREFIX = RedisConstants.ACTIVE_CHAT_KEY_PREFIX;
+    private static final String TYPING_KEY_PREFIX = RedisConstants.TYPING_KEY_PREFIX;
 
     @Value("${presence.online-threshold-seconds:60}")
     private int onlineThresholdSeconds;
