@@ -11,7 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import com.nguyenquyen.userservice.user.UserSynchronizer;
+import com.nguyenquyen.userservice.user.service.UserSynchronizer;
 
 import java.io.IOException;
 

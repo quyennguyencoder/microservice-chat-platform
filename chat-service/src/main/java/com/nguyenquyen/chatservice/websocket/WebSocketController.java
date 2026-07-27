@@ -6,11 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Controller;
-import com.nguyenquyen.chatservice.chat.Chat;
-import com.nguyenquyen.chatservice.chat.ChatService;
-import com.nguyenquyen.chatservice.message.MessageResponse;
-import com.nguyenquyen.chatservice.message.MessageService;
-import com.nguyenquyen.chatservice.message.MessageType;
+import com.nguyenquyen.chatservice.chat.entity.Chat;
+import com.nguyenquyen.chatservice.chat.service.ChatService;
+import com.nguyenquyen.chatservice.message.dto.MessageResponse;
+import com.nguyenquyen.chatservice.message.service.MessageService;
+import com.nguyenquyen.chatservice.message.enums.MessageType;
 import com.nguyenquyen.chatservice.presence.PresenceService;
 
 import java.security.Principal;
