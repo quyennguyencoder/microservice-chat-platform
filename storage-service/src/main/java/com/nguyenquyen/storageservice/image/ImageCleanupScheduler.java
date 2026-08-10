@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -52,31 +51,24 @@ public class ImageCleanupScheduler {
 
         log.info("Found {} expired pending uploads to cleanup in this batch", expiredRecords.size());
 
-        // Group by bucket to do bulk delete safely
-        Map<String, List<Image>> recordsByBucket = expiredRecords.stream()
-                .collect(Collectors.groupingBy(Image::getBucketName));
+        String bucket = expiredRecords.get(0).getBucketName();
 
-        for (Map.Entry<String, List<Image>> entry : recordsByBucket.entrySet()) {
-            String bucket = entry.getKey();
-            List<Image> records = entry.getValue();
+        List<DeleteObject> objects = expiredRecords.stream()
+                .map(img -> new DeleteObject(img.getObjectName()))
+                .collect(Collectors.toList());
 
-            List<DeleteObject> objects = records.stream()
-                    .map(img -> new DeleteObject(img.getObjectName()))
-                    .collect(Collectors.toList());
-
-            try {
-                Iterable<Result<DeleteError>> results = minioClient.removeObjects(
-                        RemoveObjectsArgs.builder().bucket(bucket).objects(objects).build()
-                );
-                
-                // Need to iterate results to actually execute the removal (lazy evaluated in MinIO SDK)
-                for (Result<DeleteError> result : results) {
-                    DeleteError error = result.get();
-                    log.error("Failed to delete object {}: {}", error.objectName(), error.message());
-                }
-            } catch (Exception e) {
-                log.error("Failed to bulk remove objects from bucket {}", bucket, e);
+        try {
+            Iterable<Result<DeleteError>> results = minioClient.removeObjects(
+                    RemoveObjectsArgs.builder().bucket(bucket).objects(objects).build()
+            );
+            
+            // Need to iterate results to actually execute the removal (lazy evaluated in MinIO SDK)
+            for (Result<DeleteError> result : results) {
+                DeleteError error = result.get();
+                log.error("Failed to delete object {}: {}", error.objectName(), error.message());
             }
+        } catch (Exception e) {
+            log.error("Failed to bulk remove objects from bucket {}", bucket, e);
         }
 
         for (Image record : expiredRecords) {

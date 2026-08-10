@@ -18,7 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.nguyenquyen.chatservice.chat.entity.Chat;
 import com.nguyenquyen.chatservice.chat.service.ChatService;
 import com.nguyenquyen.common.kafka.event.ChatEvent;
 import com.nguyenquyen.chatservice.kafka.ChatEventPublisher;

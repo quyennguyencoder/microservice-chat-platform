@@ -134,12 +134,6 @@ public class MessageSearchServiceImpl implements MessageSearchService {
                     .query(query)
                     .from(criteria.getPage() * criteria.getSize())
                     .size(criteria.getSize())
-                    .highlight(h -> h
-                            .fields("content", f -> f
-                                    .preTags("<em>")
-                                    .postTags("</em>")
-                            )
-                    )
             );
 
             long startTime = System.currentTimeMillis();
@@ -173,12 +167,6 @@ public class MessageSearchServiceImpl implements MessageSearchService {
         }
 
         MessageSearchResult result = messageMapper.toSearchResult(doc);
-
-        if (hit.highlight() != null && hit.highlight().containsKey("content")) {
-            result.setHighlightedContent(String.join("... ", hit.highlight().get("content")));
-        } else {
-            result.setHighlightedContent(doc.getContent());
-        }
 
         return result;
     }

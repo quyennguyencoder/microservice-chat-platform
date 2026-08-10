@@ -44,11 +44,8 @@ public class RedisMessageSubscriber implements MessageListener {
     @Override
     public void onMessage(Message message, byte[] pattern) {
         try {
-            // Deserialize byte array -> RedisChatMessage object
-            Object deserialized = serializer.deserialize(message.getBody());
-
-            // Fix ClassCastException if Redis template serialized it as LinkedHashMap
-            RedisChatMessage redisMessage = objectMapper.convertValue(deserialized, RedisChatMessage.class);
+            // Directly deserialize byte array -> RedisChatMessage object using objectMapper
+            RedisChatMessage redisMessage = objectMapper.readValue(message.getBody(), RedisChatMessage.class);
 
             if (redisMessage == null || redisMessage.getMessage() == null) {
                 return;

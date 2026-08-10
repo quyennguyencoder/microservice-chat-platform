@@ -5,7 +5,6 @@ import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.*;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
-import co.elastic.clients.elasticsearch.core.search.HighlightField;
 import com.nguyenquyen.searchservice.client.UserServiceClient;
 import com.nguyenquyen.searchservice.client.FriendshipResponse;
 import lombok.RequiredArgsConstructor;
@@ -39,11 +38,6 @@ public class UserSearchServiceImpl implements UserSearchService {
     @Value("${index.users.name:users}")
     private String usersIndex;
 
-    @Value("${search.highlight.pre-tag:<em>}")
-    private String highlightPreTag;
-
-    @Value("${search.highlight.post-tag:</em>}")
-    private String highlightPostTag;
 
     @Value("${search.fuzzy.max-expansions:50}")
     private int fuzzyMaxExpansions;
@@ -212,9 +206,7 @@ public class UserSearchServiceImpl implements UserSearchService {
 
             addSorting(searchBuilder, criteria);
 
-            if (Boolean.TRUE.equals(criteria.getHighlight())) {
-                addHighlighting(searchBuilder);
-            }
+
 
             SearchResponse<UserDocument> response = elasticsearchClient.search(
                     searchBuilder.build(),
@@ -286,14 +278,5 @@ public class UserSearchServiceImpl implements UserSearchService {
         }
     }
 
-    private void addHighlighting(SearchRequest.Builder builder) {
-        builder.highlight(h -> h
-                .preTags(highlightPreTag)
-                .postTags(highlightPostTag)
-                .fields("username", HighlightField.of(hf -> hf.numberOfFragments(0)))
-                .fields("description", HighlightField.of(hf -> hf
-                        .numberOfFragments(2)
-                        .fragmentSize(150)))
-        );
-    }
+
 }

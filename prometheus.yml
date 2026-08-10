@@ -1,40 +1,36 @@
 global:
   scrape_interval: 15s
+  scrape_timeout: 10s # Thêm timeout để tránh kẹt request
 
-rule_files:
-  - "/etc/prometheus/alert.rules.yml"
+# comment lại phần này vì chuyển sang dùng Grafana Managed Alerts
+# rule_files:
+#   - "/etc/prometheus/alert.rules.yml"
 
 scrape_configs:
+  # Job nội bộ giám sát chính Prometheus
   - job_name: 'prometheus-self'
     static_configs:
       - targets: ['localhost:9090']
 
-  - job_name: 'api-gateway'
+  # Gộp toàn bộ Microservices vào 1 Job duy nhất cho gọn
+  - job_name: 'spring-microservices'
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: ['host.docker.internal:8000']
-
-  - job_name: 'user-service'
-    metrics_path: '/actuator/prometheus'
-    static_configs:
+        labels:
+          app: 'api-gateway'
       - targets: ['host.docker.internal:8010']
-
-  - job_name: 'chat-service'
-    metrics_path: '/actuator/prometheus'
-    static_configs:
+        labels:
+          app: 'user-service'
       - targets: ['host.docker.internal:8020']
-
-  - job_name: 'notification-service'
-    metrics_path: '/actuator/prometheus'
-    static_configs:
+        labels:
+          app: 'chat-service'
       - targets: ['host.docker.internal:8030']
-
-  - job_name: 'search-service'
-    metrics_path: '/actuator/prometheus'
-    static_configs:
+        labels:
+          app: 'notification-service'
       - targets: ['host.docker.internal:8040']
-
-  - job_name: 'storage-service'
-    metrics_path: '/actuator/prometheus'
-    static_configs:
+        labels:
+          app: 'search-service'
       - targets: ['host.docker.internal:8050']
+        labels:
+          app: 'storage-service'

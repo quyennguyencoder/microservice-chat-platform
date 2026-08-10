@@ -30,11 +30,7 @@ public interface ChatMapper {
 
     ChatMemberResponse toMemberResponse(ChatMember chatMember);
 
-    default List<ChatResponse> toResponseList(List<Chat> chats, String currentUserId, @Context MessageRepository messageRepository) {
-        return chats.stream()
-                .map(chat -> toResponse(chat, currentUserId, messageRepository))
-                .toList();
-    }
+
 
     default Optional<Message> getLastMessage(Chat chat, MessageRepository messageRepository) {
         return messageRepository.findFirstByChatIdOrderByCreatedAtDesc(chat.getId());
@@ -78,5 +74,30 @@ public interface ChatMapper {
 
     default int countUnreadMessages(Chat chat, String currentUserId, MessageRepository messageRepository) {
         return messageRepository.countUnreadMessages(chat.getId(), currentUserId, MessageState.SENT);
+    }
+
+    @Mapping(target = "id", source = "chat.id")
+    @Mapping(target = "type", source = "chat.type")
+    @Mapping(target = "imageId", source = "chat.imageId")
+    @Mapping(target = "createdAt", source = "chat.createdAt")
+    @Mapping(target = "lastMessage", expression = "java(getLastMessagePreview(lastMessage))")
+    @Mapping(target = "lastMessageTime", expression = "java(lastMessage != null ? lastMessage.getCreatedAt() : chat.getCreatedAt())")
+    @Mapping(target = "unreadCount", source = "unreadCount")
+    @Mapping(target = "lastMessageType", expression = "java(lastMessage != null ? lastMessage.getType() : null)")
+    @Mapping(target = "lastMessageImageId", expression = "java(lastMessage != null && lastMessage.getType() == MessageType.IMAGE ? lastMessage.getImageId() : null)")
+    ChatResponse toResponseBulk(Chat chat, @Context String currentUserId, Message lastMessage, int unreadCount);
+
+    default String getLastMessagePreview(Message message) {
+        if (message == null) return null;
+        if (message.getType() != MessageType.TEXT && message.getType() != MessageType.SYSTEM) {
+            return "📎 " + message.getType().name().toLowerCase();
+        }
+        String content = message.getContent();
+        if (content == null || content.isEmpty()) {
+            return null;
+        }
+        return content.length() > 50
+                ? content.substring(0, 50) + "..."
+                : content;
     }
 }

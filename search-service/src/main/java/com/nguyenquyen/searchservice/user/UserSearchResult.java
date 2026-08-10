@@ -20,10 +20,5 @@ public class UserSearchResult {
     private String description;
     private String imageId;
     private String bannerImageId;
-
-
     private Instant createdAt;
-
-    private Map<String, List<String>> highlights;
-    private Float score;
 }
