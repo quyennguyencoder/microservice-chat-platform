@@ -21,7 +21,7 @@ public class ChatEventPublisher {
     private String chatEventsTopic;
 
     public void publish(ChatEvent event) {
-        String key = event.getRecipientId();
+        String key = event.getChatId() != null ? event.getChatId().toString() : java.util.UUID.randomUUID().toString();
 
         CompletableFuture<SendResult<String, ChatEvent>> future =
                 kafkaTemplate.send(chatEventsTopic, key, event);

@@ -15,10 +15,7 @@ public class UserSearchMapper {
         UserDocument doc = hit.source();
         if (doc == null) return null;
 
-        Map<String, List<String>> highlights = new HashMap<>();
-        if (hit.highlight() != null) {
-            highlights.putAll(hit.highlight());
-        }
+
 
         return UserSearchResult.builder()
                 .id(doc.getId())
@@ -28,8 +25,6 @@ public class UserSearchMapper {
                 .bannerImageId(doc.getBannerImageId())
 
                 .createdAt(doc.getCreatedAt())
-                .highlights(highlights)
-                .score(hit.score() != null ? hit.score().floatValue() : null)
                 .build();
     }
 

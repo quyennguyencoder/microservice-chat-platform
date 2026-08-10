@@ -23,8 +23,7 @@ public class MessageSearchController {
             @RequestParam(defaultValue = "DESC") SearchCriteria.SortOrder sortOrder,
             @RequestParam(defaultValue = "0") @jakarta.validation.constraints.Min(0) Integer page,
             @RequestParam(defaultValue = "20") @jakarta.validation.constraints.Min(1) @jakarta.validation.constraints.Max(100) Integer size,
-            @RequestParam(defaultValue = "true") Boolean fuzzy,
-            @RequestParam(defaultValue = "true") Boolean highlight
+            @RequestParam(defaultValue = "true") Boolean fuzzy
     ) {
         SearchCriteria criteria = SearchCriteria.builder()
                 .query(q)
@@ -35,7 +34,6 @@ public class MessageSearchController {
                 .page(page)
                 .size(size)
                 .fuzzy(fuzzy)
-                .highlight(highlight)
                 .build();
 
         return ResponseEntity.ok(ApiResponse.success(messageSearchService.searchMessages(criteria)));

@@ -5,6 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import com.nguyenquyen.common.exception.BadRequestException;
 import com.nguyenquyen.common.exception.ResourceNotFoundException;
 import com.nguyenquyen.common.util.SecurityUtils;
@@ -329,7 +332,37 @@ public class ChatServiceImpl implements ChatService {
     public List<ChatResponse> getMyChats() {
         String currentUserId = SecurityUtils.requireCurrentUserId();
         List<Chat> chats = chatRepository.findAllByUserIdOrderedByLastMessage(currentUserId);
-        return chatMapper.toResponseList(chats, currentUserId, messageRepository);
+        
+        if (chats.isEmpty()) {
+            return List.of();
+        }
+        
+        List<UUID> chatIds = chats.stream().map(Chat::getId).toList();
+        
+        // Fetch latest messages and map by chatId
+        List<com.nguyenquyen.chatservice.message.entity.Message> latestMessages = messageRepository.findLatestMessagesForChats(chatIds);
+        Map<UUID, com.nguyenquyen.chatservice.message.entity.Message> lastMessageMap = latestMessages.stream()
+                .collect(Collectors.toMap(
+                        m -> m.getChat().getId(),
+                        Function.identity(),
+                        (existing, replacement) -> existing // fallback if duplicate
+                ));
+                
+        // Fetch unread counts and map by chatId
+        List<MessageRepository.ChatUnreadCount> unreadCounts = messageRepository.countUnreadMessagesForChats(
+                chatIds, currentUserId, com.nguyenquyen.chatservice.message.enums.MessageState.SENT
+        );
+        Map<UUID, Integer> unreadCountMap = unreadCounts.stream()
+                .collect(Collectors.toMap(
+                        MessageRepository.ChatUnreadCount::getChatId,
+                        MessageRepository.ChatUnreadCount::getUnreadCount
+                ));
+        
+        return chats.stream().map(chat -> {
+            com.nguyenquyen.chatservice.message.entity.Message lastMsg = lastMessageMap.get(chat.getId());
+            int unread = unreadCountMap.getOrDefault(chat.getId(), 0);
+            return chatMapper.toResponseBulk(chat, currentUserId, lastMsg, unread);
+        }).toList();
     }
 
     @Override

@@ -20,6 +20,4 @@ public class MessageSearchResult {
     private String type;
     private Instant createdAt;
 
-    // Highlighted fragments
-    private String highlightedContent;
 }

@@ -51,9 +51,6 @@ public class SearchCriteria {
     @Builder.Default
     private Boolean fuzzy = true;
 
-    @Builder.Default
-    private Boolean highlight = true;
-
     public enum SearchType {
         USERS, MESSAGES
     }

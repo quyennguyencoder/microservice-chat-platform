@@ -26,7 +26,6 @@ public class UserSearchController {
             @RequestParam(defaultValue = "0") @Min(0) Integer page,
             @RequestParam(defaultValue = "20") @Min(1) @Max(100) Integer size,
             @RequestParam(defaultValue = "true") Boolean fuzzy,
-            @RequestParam(defaultValue = "true") Boolean highlight,
             @RequestParam(required = false) Boolean friendsOnly
     ) {
         SearchCriteria criteria = SearchCriteria.builder()
@@ -36,7 +35,6 @@ public class UserSearchController {
                 .page(page)
                 .size(size)
                 .fuzzy(fuzzy)
-                .highlight(highlight)
                 .friendsOnly(friendsOnly)
                 .build();
 

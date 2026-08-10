@@ -26,6 +26,18 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
 
     Optional<Message> findFirstByChatIdOrderByCreatedAtDesc(UUID chatId);
 
+    @Query("""
+        SELECT m FROM Message m 
+        WHERE m.id IN (
+            SELECT m2.id FROM Message m2 
+            WHERE m2.chat.id IN :chatIds 
+            AND m2.createdAt = (
+                SELECT MAX(m3.createdAt) FROM Message m3 WHERE m3.chat.id = m2.chat.id
+            )
+        )
+    """)
+    List<Message> findLatestMessagesForChats(@Param("chatIds") List<UUID> chatIds);
+
     @Query("SELECT COUNT(m) FROM Message m WHERE m.chat.id = :chatId AND m.createdAt > (SELECT m2.createdAt FROM Message m2 WHERE m2.id = :messageId)")
     long countNewerMessages(@Param("chatId") UUID chatId, @Param("messageId") UUID messageId);
 
@@ -58,4 +70,23 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
 
     @Query("SELECT m.imageId FROM Message m WHERE m.chat.id = :chatId AND m.imageId IS NOT NULL")
     List<String> findImageIdsByChatId(@Param("chatId") UUID chatId);
+
+    interface ChatUnreadCount {
+        UUID getChatId();
+        int getUnreadCount();
+    }
+
+    @Query("""
+        SELECT m.chat.id as chatId, COUNT(m) as unreadCount 
+        FROM Message m 
+        WHERE m.chat.id IN :chatIds 
+        AND m.senderId != :userId 
+        AND m.state = :state 
+        GROUP BY m.chat.id
+    """)
+    List<ChatUnreadCount> countUnreadMessagesForChats(
+            @Param("chatIds") List<UUID> chatIds,
+            @Param("userId") String userId,
+            @Param("state") MessageState state
+    );
 }

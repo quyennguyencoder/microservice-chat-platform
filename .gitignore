@@ -2,6 +2,7 @@ main.tex
 /resume
 /zchat-client
 /zchat-client-v2
+/zchat-web
 .agents
 .context
 .env
