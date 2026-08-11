@@ -115,7 +115,7 @@ spring:
         - id: storage-service-route
           uri: lb://STORAGE-SERVICE
           predicates:
-            - Path=/api/v1/images/**
+            - Path=/api/v1/attachments/**
           filters:
             - name: CircuitBreaker
               args:

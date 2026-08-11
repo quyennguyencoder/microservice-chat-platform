@@ -35,5 +35,8 @@ public class MessageDocument {
     private String type;
 
     @Field(type = FieldType.Date)
-    private Instant createdAt;
+    private Long createdAt;
+
+    @Field(type = FieldType.Date)
+    private Long updatedAt;
 }

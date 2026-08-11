@@ -1,4 +1,4 @@
-package com.nguyenquyen.storageservice.image;
+package com.nguyenquyen.storageservice.attachment;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,14 +11,16 @@ import java.time.Instant;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ImageMetadata {
+public class ConfirmUploadResponse {
 
-    private String imageId;
+    private String attachmentId;
+    private String attachmentUrl;
     private String fileName;
-    private String contentType;
     private Long size;
+    private String contentType;
     private Instant updatedAt;
-    private String bucketName;
+    private boolean confirmed;
+
     private Integer width;
     private Integer height;
 

@@ -49,8 +49,8 @@ public class Message {
     @Builder.Default
     private MessageState state = MessageState.SENT;
 
-    @Column(name = "image_id", length = 100)
-    private String imageId;
+    @Column(name = "attachment_id", length = 100)
+    private String attachmentId;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)

@@ -8,7 +8,7 @@ public record FriendshipResponse(
         String userId,
         String username,
         String displayName,
-        String imageId,
+        String avatar,
         FriendshipStatus status,
         Instant since
 ) {

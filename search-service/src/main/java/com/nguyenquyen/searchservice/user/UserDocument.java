@@ -32,14 +32,16 @@ public class UserDocument {
     private String description;
 
     @Field(type = FieldType.Keyword)
-    private String imageId;
+    private String avatar;
 
     @Field(type = FieldType.Keyword)
-    private String bannerImageId;
+    private String banner;
+
+
 
     @Field(type = FieldType.Date, format = DateFormat.epoch_millis)
-    private Instant createdAt;
+    private Long createdAt;
 
     @Field(type = FieldType.Date, format = DateFormat.epoch_millis)
-    private Instant updatedAt;
+    private Long updatedAt;
 }

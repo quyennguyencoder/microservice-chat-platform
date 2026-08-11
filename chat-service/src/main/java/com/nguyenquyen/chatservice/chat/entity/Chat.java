@@ -35,8 +35,8 @@ public class Chat {
     @Column(length = 100)
     private String name; // Group name (null for PRIVATE)
 
-    @Column(name = "image_id", length = 100)
-    private String imageId; // Group avatar (null for PRIVATE)
+    @Column(name = "attachment_id", length = 100)
+    private String attachmentId; // Group avatar (null for PRIVATE)
 
     @Column(name = "owner_id", nullable = false)
     private String ownerId; // Creator of the chat

@@ -1,4 +1,4 @@
-package com.nguyenquyen.storageservice.image;
+package com.nguyenquyen.storageservice.attachment;
 
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
@@ -15,14 +15,14 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ImageUrlService {
+public class AttachmentUrlService {
 
     private final MinioClient minioClient;
 
-    @Value("${image-storage.presigned-url-expiry-minutes:15}")
+    @Value("${attachment-storage.presigned-url-expiry-minutes:15}")
     private int presignedUploadExpiryMinutes;
 
-    @Value("${image-storage.download-url-expiry-hours:24}")
+    @Value("${attachment-storage.download-url-expiry-hours:24}")
     private int downloadUrlExpiryHours;
 
     public String generatePresignedPutUrl(String bucket, String objectName) {
@@ -37,7 +37,7 @@ public class ImageUrlService {
             );
         } catch (Exception e) {
             log.error("Failed to generate presigned PUT URL", e);
-            throw new AppException(ErrorCode.IMAGE_STORAGE_ERROR, "Failed to generate upload URL", e);
+            throw new AppException(ErrorCode.ATTACHMENT_STORAGE_ERROR, "Failed to generate upload URL", e);
         }
     }
 
@@ -57,7 +57,7 @@ public class ImageUrlService {
             );
         } catch (Exception e) {
             log.error("Failed to generate presigned GET URL", e);
-            throw new AppException(ErrorCode.IMAGE_STORAGE_ERROR, "Failed to generate download URL", e);
+            throw new AppException(ErrorCode.ATTACHMENT_STORAGE_ERROR, "Failed to generate download URL", e);
         }
     }
 

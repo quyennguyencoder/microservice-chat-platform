@@ -1,4 +1,4 @@
-package com.nguyenquyen.storageservice.image;
+package com.nguyenquyen.storageservice.attachment;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

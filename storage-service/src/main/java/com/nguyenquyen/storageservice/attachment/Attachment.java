@@ -1,4 +1,4 @@
-package com.nguyenquyen.storageservice.image;
+package com.nguyenquyen.storageservice.attachment;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -11,10 +11,10 @@ import java.time.Instant;
 
 
 @Entity
-@Table(name = "image", indexes = {
-        @Index(name = "idx_image_status", columnList = "status"),
-        @Index(name = "idx_image_category_status", columnList = "category, status"),
-        @Index(name = "idx_image_created_at", columnList = "createdAt")
+@Table(name = "attachment", indexes = {
+        @Index(name = "idx_attachment_status", columnList = "status"),
+        @Index(name = "idx_attachment_category_status", columnList = "category, status"),
+        @Index(name = "idx_attachment_created_at", columnList = "createdAt")
 })
 @Getter
 @Setter
@@ -22,7 +22,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @Builder
 @EntityListeners(AuditingEntityListener.class)
-public class Image {
+public class Attachment {
 
     @Id
     @Column(unique = true, nullable = false, length = 36)
@@ -41,7 +41,7 @@ public class Image {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private ImageStatus status;
+    private AttachmentStatus status;
 
 
     @Column(nullable = false)
@@ -59,7 +59,7 @@ public class Image {
 
     private Instant confirmedAt;
 
-    public enum ImageStatus {
+    public enum AttachmentStatus {
         PENDING,
         CONFIRMED,
         EXPIRED,
@@ -67,10 +67,10 @@ public class Image {
     }
 
     public boolean isPending() {
-        return status == ImageStatus.PENDING;
+        return status == AttachmentStatus.PENDING;
     }
 
     public boolean isConfirmed() {
-        return status == ImageStatus.CONFIRMED;
+        return status == AttachmentStatus.CONFIRMED;
     }
 }

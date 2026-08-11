@@ -4,7 +4,7 @@ import com.nguyenquyen.common.exception.AppException;
 import com.nguyenquyen.common.exception.ErrorCode;
 import com.nguyenquyen.common.kafka.event.UserEvent;
 import com.nguyenquyen.common.kafka.event.UserEventType;
-import com.nguyenquyen.userservice.client.ImageService;
+import com.nguyenquyen.userservice.client.AttachmentService;
 import com.nguyenquyen.userservice.kafka.UserEventPublisher;
 import com.nguyenquyen.userservice.user.dto.UserResponse;
 import com.nguyenquyen.userservice.user.dto.UserUpdateRequest;
@@ -25,7 +25,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final ImageService imageService;
+    private final AttachmentService attachmentService;
     private final UserEventPublisher eventPublisher;
 
     @Override
@@ -51,8 +51,8 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        handleImageUpdate(request.imageId(), user.getImageId(), user::setImageId);
-        handleImageUpdate(request.bannerImageId(), user.getBannerImageId(), user::setBannerImageId);
+        handleImageUpdate(request.avatar(), user.getAvatar(), user::setAvatar);
+        handleImageUpdate(request.banner(), user.getBanner(), user::setBanner);
 
         userMapper.updateFromRequest(request, user);
 
@@ -65,8 +65,8 @@ public class UserServiceImpl implements UserService {
                 .email(saved.getEmail())
                 .displayName(saved.getDisplayName())
                 .description(saved.getDescription())
-                .imageId(saved.getImageId())
-                .bannerImageId(saved.getBannerImageId())
+                .avatar(saved.getAvatar())
+                .banner(saved.getBanner())
                 .build());
 
         return userMapper.toResponse(saved);
@@ -78,13 +78,13 @@ public class UserServiceImpl implements UserService {
         }
 
         if (newId.isBlank()) {
-            imageService.deleteImageSafely(currentId);
+            attachmentService.deleteAttachmentSafely(currentId);
             setter.accept(null);
             return;
         }
 
         if (!newId.equals(currentId)) {
-            imageService.deleteImageSafely(currentId);
+            attachmentService.deleteAttachmentSafely(currentId);
             setter.accept(newId);
         }
     }

@@ -18,7 +18,8 @@ public class UserSearchResult {
     private String id;
     private String username;
     private String description;
-    private String imageId;
-    private String bannerImageId;
+    private String avatar;
+    private String banner;
     private Instant createdAt;
+    private Instant updatedAt;
 }

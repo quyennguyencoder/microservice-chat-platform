@@ -19,5 +19,5 @@ public class MessageSearchResult {
     private String content;
     private String type;
     private Instant createdAt;
-
+    private Instant updatedAt;
 }

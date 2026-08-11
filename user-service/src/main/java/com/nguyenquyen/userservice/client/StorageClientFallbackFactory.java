@@ -10,6 +10,6 @@ public class StorageClientFallbackFactory implements FallbackFactory<StorageClie
 
     @Override
     public StorageClient create(Throwable cause) {
-        return imageId -> log.error("Failed to delete image: {}", imageId, cause);
+        return attachmentId -> log.error("Failed to delete attachment: {}", attachmentId, cause);
     }
 }

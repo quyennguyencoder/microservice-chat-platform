@@ -22,7 +22,7 @@ public class SuggestResponse {
     public static class Suggestion {
         private String text;
         private SuggestionType type;
-        private String imageId; 
+        private String avatar; 
         private Float score;
     }
 

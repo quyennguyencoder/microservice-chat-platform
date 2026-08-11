@@ -110,8 +110,8 @@ public class UserSynchronizer {
                 .email(user.getEmail())
                 .displayName(user.getDisplayName())
                 .description(user.getDescription())
-                .imageId(user.getImageId())
-                .bannerImageId(user.getBannerImageId())
+                .avatar(user.getAvatar())
+                .banner(user.getBanner())
                 .build());
     }
 }

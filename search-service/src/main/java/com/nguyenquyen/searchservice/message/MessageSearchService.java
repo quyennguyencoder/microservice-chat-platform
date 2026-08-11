@@ -9,5 +9,7 @@ public interface MessageSearchService {
 
     void deleteMessage(String messageId);
 
+    java.util.Optional<MessageDocument> findById(String messageId);
+
     SearchResult<MessageSearchResult> searchMessages(SearchCriteria criteria);
 }

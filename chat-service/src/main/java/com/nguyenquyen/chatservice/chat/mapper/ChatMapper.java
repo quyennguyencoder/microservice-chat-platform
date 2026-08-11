@@ -25,7 +25,7 @@ public interface ChatMapper {
     @Mapping(target = "lastMessageTime", expression = "java(getLastMessageTime(chat, messageRepository))")
     @Mapping(target = "unreadCount", expression = "java(countUnreadMessages(chat, currentUserId, messageRepository))")
     @Mapping(target = "lastMessageType", expression = "java(getLastMessageType(chat, messageRepository))")
-    @Mapping(target = "lastMessageImageId", expression = "java(getLastMessageImageId(chat, messageRepository))")
+    @Mapping(target = "lastMessageAttachmentId", expression = "java(getLastMessageAttachmentId(chat, messageRepository))")
     ChatResponse toResponse(Chat chat, @Context String currentUserId, @Context MessageRepository messageRepository);
 
     ChatMemberResponse toMemberResponse(ChatMember chatMember);
@@ -65,10 +65,10 @@ public interface ChatMapper {
                 .orElse(null);
     }
 
-    default String getLastMessageImageId(Chat chat, MessageRepository messageRepository) {
+    default String getLastMessageAttachmentId(Chat chat, MessageRepository messageRepository) {
         return getLastMessage(chat, messageRepository)
                 .filter(m -> m.getType() == MessageType.IMAGE)
-                .map(Message::getImageId)
+                .map(Message::getAttachmentId)
                 .orElse(null);
     }
 
@@ -78,13 +78,13 @@ public interface ChatMapper {
 
     @Mapping(target = "id", source = "chat.id")
     @Mapping(target = "type", source = "chat.type")
-    @Mapping(target = "imageId", source = "chat.imageId")
+    @Mapping(target = "attachmentId", source = "chat.attachmentId")
     @Mapping(target = "createdAt", source = "chat.createdAt")
     @Mapping(target = "lastMessage", expression = "java(getLastMessagePreview(lastMessage))")
     @Mapping(target = "lastMessageTime", expression = "java(lastMessage != null ? lastMessage.getCreatedAt() : chat.getCreatedAt())")
     @Mapping(target = "unreadCount", source = "unreadCount")
     @Mapping(target = "lastMessageType", expression = "java(lastMessage != null ? lastMessage.getType() : null)")
-    @Mapping(target = "lastMessageImageId", expression = "java(lastMessage != null && lastMessage.getType() == MessageType.IMAGE ? lastMessage.getImageId() : null)")
+    @Mapping(target = "lastMessageAttachmentId", expression = "java(lastMessage != null && lastMessage.getType() == MessageType.IMAGE ? lastMessage.getAttachmentId() : null)")
     ChatResponse toResponseBulk(Chat chat, @Context String currentUserId, Message lastMessage, int unreadCount);
 
     default String getLastMessagePreview(Message message) {

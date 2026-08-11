@@ -28,9 +28,9 @@ minio:
   accessKey: ${MINIO_ACCESS_KEY:minioadmin}
   secretKey: ${MINIO_SECRET_KEY:minioadmin}
 
-image-storage:
+attachment-storage:
   max-file-size: 10485760  # 10MB
-  allowed-content-types: image/jpeg,image/jpg,image/png,image/gif,image/webp
+  allowed-content-types: image/jpeg,image/jpg,image/png,image/gif,image/webp,application/pdf
   presigned-url-expiry-minutes: 15
   download-url-expiry-hours: 24
   cleanup:

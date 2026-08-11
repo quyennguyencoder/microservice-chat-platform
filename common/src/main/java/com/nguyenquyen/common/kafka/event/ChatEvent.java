@@ -17,7 +17,7 @@ public class ChatEvent implements BaseEvent {
     private String actorId;
     private String recipientId;
     private String previewText;
-    private String previewImageId;
+    private String previewAttachmentId;
 
     private UUID chatId;
     private UUID messageId;

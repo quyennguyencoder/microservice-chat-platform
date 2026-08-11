@@ -5,5 +5,5 @@ public interface BaseEvent {
     String getActorId();
     String getRecipientId();
     String getPreviewText();
-    String getPreviewImageId();
+    String getPreviewAttachmentId();
 }

@@ -69,7 +69,7 @@ public class SuggestServiceImpl implements SuggestService {
                         .query(prefixQuery)
                         .size(limit / 2)
                         .source(src -> src.filter(f -> f
-                                .includes("username", "imageId"))),
+                                .includes("username", "avatar"))),
                 UserDocument.class
         );
 
@@ -83,7 +83,7 @@ public class SuggestServiceImpl implements SuggestService {
                 suggestions.add(SuggestResponse.Suggestion.builder()
                         .text(doc.getUsername())
                         .type(SuggestResponse.SuggestionType.USERNAME)
-                        .imageId(doc.getImageId())
+                        .avatar(doc.getAvatar())
                         .score(hit.score() != null ? hit.score().floatValue() * 0.7f : 0f)
                         .build());
             }

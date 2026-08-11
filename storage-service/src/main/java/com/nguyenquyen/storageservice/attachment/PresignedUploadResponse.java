@@ -1,4 +1,4 @@
-package com.nguyenquyen.storageservice.image;
+package com.nguyenquyen.storageservice.attachment;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,7 +13,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class PresignedUploadResponse {
 
-    private String imageId;
+    private String attachmentId;
     private String uploadUrl;
     private Long expiresAt;
     private Map<String, String> requiredHeaders;

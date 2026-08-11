@@ -283,7 +283,7 @@ public class FriendshipServiceImpl implements FriendshipService {
                 otherUser.getId(),
                 otherUser.getUsername(),
                 otherUser.getDisplayName(),
-                otherUser.getImageId(),
+                otherUser.getAvatar(),
                 friendship.getStatus(),
                 friendship.getCreatedAt()
         );

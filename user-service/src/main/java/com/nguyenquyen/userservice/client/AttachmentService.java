@@ -8,22 +8,22 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class ImageService {
+public class AttachmentService {
 
     private final StorageClient storageClient;
 
-    public void deleteImageSafely(String imageId) {
-        if (imageId == null || imageId.isBlank()) {
+    public void deleteAttachmentSafely(String attachmentId) {
+        if (attachmentId == null || attachmentId.isBlank()) {
             return;
         }
 
         try {
-            storageClient.deleteImage(imageId);
-            log.info("Deleted image: {}", imageId);
+            storageClient.deleteAttachment(attachmentId);
+            log.info("Deleted attachment: {}", attachmentId);
         } catch (FeignException.NotFound e) {
-            log.warn("Image not found: {}", imageId);
+            log.warn("Attachment not found: {}", attachmentId);
         } catch (Exception e) {
-            log.error("Failed to delete image: {}", imageId, e);
+            log.error("Failed to delete attachment: {}", attachmentId, e);
         }
     }
 }

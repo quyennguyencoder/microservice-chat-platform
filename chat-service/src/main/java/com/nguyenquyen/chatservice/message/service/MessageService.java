@@ -11,9 +11,9 @@ import java.util.UUID;
 
 public interface MessageService {
 
-    MessageResponse sendMessage(UUID chatId, String content, MessageType type, String imageId);
+    MessageResponse sendMessage(UUID chatId, String content, MessageType type, String attachmentId);
 
-    MessageResponse sendMessage(UUID chatId, String senderId, String content, MessageType type, String imageId);
+    MessageResponse sendMessage(UUID chatId, String senderId, String content, MessageType type, String attachmentId);
 
     Page<MessageResponse> getChatMessages(UUID chatId, Pageable pageable);
 

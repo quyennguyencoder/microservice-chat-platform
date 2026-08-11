@@ -23,8 +23,8 @@ public interface MessageMapper {
     @Mapping(target = "senderId", source = "senderId")
     @Mapping(target = "content", source = "content")
     @Mapping(target = "type", source = "type")
-    @Mapping(target = "imageId", source = "imageId")
+    @Mapping(target = "attachmentId", source = "attachmentId")
     @Mapping(target = "state", constant = "SENT")
     @Mapping(target = "createdAt", ignore = true)
-    Message toEntity(Chat chat, String senderId, String content, MessageType type, String imageId);
+    Message toEntity(Chat chat, String senderId, String content, MessageType type, String attachmentId);
 }

@@ -64,6 +64,21 @@ public class MessageSearchServiceImpl implements MessageSearchService {
     }
 
     @Override
+    public java.util.Optional<MessageDocument> findById(String messageId) {
+        try {
+            co.elastic.clients.elasticsearch.core.GetResponse<MessageDocument> response = 
+                elasticsearchClient.get(g -> g.index(messagesIndex).id(messageId), MessageDocument.class);
+            if (response.found()) {
+                return java.util.Optional.ofNullable(response.source());
+            }
+            return java.util.Optional.empty();
+        } catch (IOException e) {
+            log.error("Failed to find message by id: {}", messageId, e);
+            return java.util.Optional.empty();
+        }
+    }
+
+    @Override
     public SearchResult<MessageSearchResult> searchMessages(SearchCriteria criteria) {
         List<java.util.UUID> userChatIds = null;
 

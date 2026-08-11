@@ -68,8 +68,8 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
             @Param("state") MessageState state
     );
 
-    @Query("SELECT m.imageId FROM Message m WHERE m.chat.id = :chatId AND m.imageId IS NOT NULL")
-    List<String> findImageIdsByChatId(@Param("chatId") UUID chatId);
+    @Query("SELECT m.attachmentId FROM Message m WHERE m.chat.id = :chatId AND m.attachmentId IS NOT NULL")
+    List<String> findAttachmentIdsByChatId(@Param("chatId") UUID chatId);
 
     interface ChatUnreadCount {
         UUID getChatId();

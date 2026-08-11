@@ -31,11 +31,11 @@ public class User {
     @Column(name = "display_name", length = 100)
     private String displayName;
 
-    @Column(name = "image_id", length = 100)
-    private String imageId; // Avatar từ storage-service
+    @Column(name = "avatar", length = 100)
+    private String avatar;
 
-    @Column(name = "banner_image_id", length = 100)
-    private String bannerImageId; // Banner từ storage-service
+    @Column(name = "banner", length = 100)
+    private String banner; // Banner từ storage-service
 
     @Column(length = 500)
     private String description; // Bio

@@ -41,23 +41,23 @@ public class MessageServiceImpl implements MessageService {
     private final ChatEventPublisher eventPublisher;
 
     @Override
-    public MessageResponse sendMessage(UUID chatId, String content, MessageType type, String imageId) {
+    public MessageResponse sendMessage(UUID chatId, String content, MessageType type, String attachmentId) {
         String currentUserId = SecurityUtils.requireCurrentUserId();
-        return sendMessageInternal(chatId, currentUserId, content, type, imageId);
+        return sendMessageInternal(chatId, currentUserId, content, type, attachmentId);
     }
 
     @Override
-    public MessageResponse sendMessage(UUID chatId, String senderId, String content, MessageType type, String imageId) {
-        return sendMessageInternal(chatId, senderId, content, type, imageId);
+    public MessageResponse sendMessage(UUID chatId, String senderId, String content, MessageType type, String attachmentId) {
+        return sendMessageInternal(chatId, senderId, content, type, attachmentId);
     }
 
-    private MessageResponse sendMessageInternal(UUID chatId, String senderId, String content, MessageType type, String imageId) {
+    private MessageResponse sendMessageInternal(UUID chatId, String senderId, String content, MessageType type, String attachmentId) {
         Chat chat = chatService.getChatEntityById(chatId);
 
         validateParticipant(chat, senderId);
 
         Message message = messageMapper.toEntity(
-                chat, senderId, content, type, imageId
+                chat, senderId, content, type, attachmentId
         );
 
         Message saved = messageRepository.save(message);
@@ -79,7 +79,7 @@ public class MessageServiceImpl implements MessageService {
                 .actorId(senderId)
                 .recipientId(null) // Null recipient signals this is a broadcast/system event
                 .previewText(getPreviewContent(content, type))
-                .previewImageId(type == MessageType.IMAGE ? imageId : null)
+                .previewAttachmentId(type == MessageType.IMAGE ? attachmentId : null)
                 .messageType(type.name())
                 .build());
         log.debug("Published base NEW_MESSAGE event to Kafka for Search Service");
@@ -95,7 +95,7 @@ public class MessageServiceImpl implements MessageService {
                         .actorId(senderId)
                         .recipientId(recipientId)
                         .previewText(getPreviewContent(content, type))
-                        .previewImageId(type == MessageType.IMAGE ? imageId : null)
+                        .previewAttachmentId(type == MessageType.IMAGE ? attachmentId : null)
                         .messageType(type.name())
                         .build());
                 log.debug("Published NEW_MESSAGE event to Kafka for recipient {}", recipientId);

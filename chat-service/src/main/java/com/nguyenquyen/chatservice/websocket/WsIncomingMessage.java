@@ -18,5 +18,5 @@ public class WsIncomingMessage {
     private UUID chatId;
     private String content;
     private MessageType messageType;
-    private String imageId;
+    private String attachmentId;
 }

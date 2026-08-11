@@ -11,6 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 )
 public interface StorageClient {
 
-    @DeleteMapping("/api/v1/images/{imageId}")
-    void deleteImage(@PathVariable String imageId);
+    @DeleteMapping("/api/v1/attachments/{attachmentId}")
+    void deleteAttachment(@PathVariable String attachmentId);
 }

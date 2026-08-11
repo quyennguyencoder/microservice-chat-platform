@@ -1,4 +1,4 @@
-package com.nguyenquyen.storageservice.image;
+package com.nguyenquyen.storageservice.attachment;
 
 import org.mapstruct.*;
 import java.util.List;
@@ -8,9 +8,9 @@ import java.util.Map;
         componentModel = "spring",
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
 )
-public interface ImageMapper {
+public interface AttachmentMapper {
 
-    @Mapping(target = "id", source = "imageId")
+    @Mapping(target = "id", source = "attachmentId")
     @Mapping(target = "objectName", source = "objectName")
     @Mapping(target = "bucketName", source = "bucketName")
     @Mapping(target = "fileName", source = "request.fileName")
@@ -23,28 +23,28 @@ public interface ImageMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "confirmedAt", ignore = true)
-    Image toEntity(PresignedUploadRequest request, String imageId, String objectName, String bucketName);
+    Attachment toEntity(PresignedUploadRequest request, String attachmentId, String objectName, String bucketName);
 
-    @Mapping(target = "imageId", source = "id")
+    @Mapping(target = "attachmentId", source = "id")
     @Mapping(target = "size", source = "fileSize")
     @Mapping(target = "width", source = "width")
     @Mapping(target = "height", source = "height")
-    ImageMetadata toMetadata(Image image);
+    AttachmentMetadata toMetadata(Attachment attachment);
 
-    List<ImageMetadata> toMetadataList(List<Image> images);
+    List<AttachmentMetadata> toMetadataList(List<Attachment> attachments);
 
-    @Mapping(target = "imageId", source = "image.id")
-    @Mapping(target = "size", source = "image.fileSize")
-    @Mapping(target = "confirmed", expression = "java(image.isConfirmed())")
-    @Mapping(target = "width", source = "image.width")
-    @Mapping(target = "height", source = "image.height")
+    @Mapping(target = "attachmentId", source = "attachment.id")
+    @Mapping(target = "size", source = "attachment.fileSize")
+    @Mapping(target = "confirmed", expression = "java(attachment.isConfirmed())")
+    @Mapping(target = "width", source = "attachment.width")
+    @Mapping(target = "height", source = "attachment.height")
     ConfirmUploadResponse toConfirmResponse(
-            Image image,
-            String imageUrl
+            Attachment attachment,
+            String attachmentUrl
     );
 
     default PresignedUploadResponse toPresignedResponse(
-            String imageId,
+            String attachmentId,
             String uploadUrl,
             long expiresAt,
             Map<String, String> requiredHeaders,
@@ -52,7 +52,7 @@ public interface ImageMapper {
             Integer height
     ) {
         return PresignedUploadResponse.builder()
-                .imageId(imageId)
+                .attachmentId(attachmentId)
                 .uploadUrl(uploadUrl)
                 .expiresAt(expiresAt)
                 .requiredHeaders(requiredHeaders)
@@ -61,9 +61,9 @@ public interface ImageMapper {
                 .build();
     }
 
-    default ImageUrlResponse toUrlResponse(String imageId, String url, long expiresAt) {
-        return ImageUrlResponse.builder()
-                .imageId(imageId)
+    default AttachmentUrlResponse toUrlResponse(String attachmentId, String url, long expiresAt) {
+        return AttachmentUrlResponse.builder()
+                .attachmentId(attachmentId)
                 .url(url)
                 .expiresAt(expiresAt)
                 .build();
