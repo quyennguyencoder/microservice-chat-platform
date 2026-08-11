@@ -60,7 +60,7 @@ public class NotificationServiceImpl implements NotificationService {
                 notification.aggregate(
                         event.getActorId(),
                         event.getPreviewText(),
-                        event.getPreviewImageId(),
+                        event.getPreviewAttachmentId(),
                         aggregationStrategy.getSecondaryRefId(event, type)
                 );
 
@@ -216,7 +216,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .actorId(event.getActorId())
                 .type(type)
                 .previewText(event.getPreviewText())
-                .previewImageId(event.getPreviewImageId())
+                .previewImageId(event.getPreviewAttachmentId())
                 .aggregatedCount(1)
                 .uniqueActorCount(1)
                 .allActorIds(initialActors);

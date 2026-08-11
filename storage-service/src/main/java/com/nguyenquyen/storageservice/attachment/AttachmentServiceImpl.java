@@ -1,4 +1,4 @@
-package com.nguyenquyen.storageservice.image;
+package com.nguyenquyen.storageservice.attachment;
 
 import io.minio.*;
 import io.minio.errors.ErrorResponseException;
@@ -22,24 +22,24 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ImageServiceImpl implements ImageService {
+public class AttachmentServiceImpl implements AttachmentService {
 
     private final MinioClient minioClient;
     private final MinioProperties minioProperties;
-    private final ImageRepository imageRepository;
-    private final ImageMapper imageMapper;
-    private final ImageUrlService imageUrlService;
+    private final AttachmentRepository attachmentRepository;
+    private final AttachmentMapper attachmentMapper;
+    private final AttachmentUrlService attachmentUrlService;
 
-    @Value("${image-storage.max-file-size:20971520}")
+    @Value("${attachment-storage.max-file-size:20971520}")
     private long maxFileSize;
 
-    @Value("${image-storage.allowed-content-types:image/jpeg,image/jpg,image/png,image/gif,image/webp}")
+    @Value("${attachment-storage.allowed-content-types:image/jpeg,image/jpg,image/png,image/gif,image/webp,application/pdf}")
     private Set<String> allowedContentTypes;
 
-    @Value("${image-storage.presigned-url-expiry-minutes:15}")
+    @Value("${attachment-storage.presigned-url-expiry-minutes:15}")
     private int presignedUploadExpiryMinutes;
 
-    @Value("${image-storage.download-url-expiry-hours:24}")
+    @Value("${attachment-storage.download-url-expiry-hours:24}")
     private int downloadUrlExpiryHours;
 
     @Override
@@ -47,28 +47,28 @@ public class ImageServiceImpl implements ImageService {
     public PresignedUploadResponse generatePresignedUploadUrl(PresignedUploadRequest request) {
         validateUploadRequest(request);
 
-        String imageId = generateImageId();
+        String attachmentId = generateAttachmentId();
         String extension = extractFileExtension(request.getFileName());
-        String objectName = buildObjectName(imageId, request.getCategory(), extension);
+        String objectName = buildObjectName(attachmentId, request.getCategory(), extension);
 
-        String uploadUrl = imageUrlService.generatePresignedPutUrl(
+        String uploadUrl = attachmentUrlService.generatePresignedPutUrl(
                 minioProperties.getBucketName(), objectName
         );
 
-        Image record = imageMapper.toEntity(request, imageId, objectName, minioProperties.getBucketName());
+        Attachment record = attachmentMapper.toEntity(request, attachmentId, objectName, minioProperties.getBucketName());
 
-        imageRepository.save(record);
+        attachmentRepository.save(record);
 
-        long expiresAt = imageUrlService.calculateExpiryTimestamp(presignedUploadExpiryMinutes);
+        long expiresAt = attachmentUrlService.calculateExpiryTimestamp(presignedUploadExpiryMinutes);
         Map<String, String> headers = Map.of("Content-Type", request.getContentType());
 
-        log.info("Generated presigned upload URL. ImageId: {}, dimensions: {}x{}",
-                imageId,
+        log.info("Generated presigned upload URL. AttachmentId: {}, dimensions: {}x{}",
+                attachmentId,
                 request.getWidth(),
                 request.getHeight());
 
-        return imageMapper.toPresignedResponse(
-                imageId,
+        return attachmentMapper.toPresignedResponse(
+                attachmentId,
                 uploadUrl,
                 expiresAt,
                 headers,
@@ -80,15 +80,15 @@ public class ImageServiceImpl implements ImageService {
     @Override
     @Transactional
     public ConfirmUploadResponse confirmUpload(ConfirmUploadRequest request) {
-        Image record = findImageById(request.getImageId());
+        Attachment record = findAttachmentById(request.getAttachmentId());
 
         if (record.isConfirmed()) {
-            log.warn("Image already confirmed: {}", request.getImageId());
+            log.warn("Attachment already confirmed: {}", request.getAttachmentId());
             return buildConfirmResponse(record);
         }
 
         if (!record.isPending()) {
-            throw new AppException(ErrorCode.IMAGE_STORAGE_ERROR, "Cannot confirm image with status: " + record.getStatus());
+            throw new AppException(ErrorCode.ATTACHMENT_STORAGE_ERROR, "Cannot confirm attachment with status: " + record.getStatus());
         }
 
         try {
@@ -98,84 +98,84 @@ public class ImageServiceImpl implements ImageService {
             record.setFileSize(stat.size());
             record.setContentType(stat.contentType());
             record.setFileName(fileName);
-            record.setStatus(Image.ImageStatus.CONFIRMED);
+            record.setStatus(Attachment.AttachmentStatus.CONFIRMED);
             record.setConfirmedAt(Instant.now());
 
-            imageRepository.save(record);
-            log.info("Upload confirmed. ImageId: {}", request.getImageId());
+            attachmentRepository.save(record);
+            log.info("Upload confirmed. AttachmentId: {}", request.getAttachmentId());
 
             return buildConfirmResponse(record);
 
         } catch (ErrorResponseException e) {
             if ("NoSuchKey".equals(e.errorResponse().code())) {
-                throw new AppException(ErrorCode.IMAGE_NOT_FOUND, "Image file not found in storage.");
+                throw new AppException(ErrorCode.ATTACHMENT_NOT_FOUND, "Attachment file not found in storage.");
             }
-            throw new AppException(ErrorCode.IMAGE_STORAGE_ERROR, "Failed to verify upload", e);
+            throw new AppException(ErrorCode.ATTACHMENT_STORAGE_ERROR, "Failed to verify upload", e);
         } catch (AppException e) {
             throw e;
         } catch (Exception e) {
-            log.error("Failed to confirm upload: {}", request.getImageId(), e);
-            throw new AppException(ErrorCode.IMAGE_STORAGE_ERROR, "Failed to confirm upload", e);
+            log.error("Failed to confirm upload: {}", request.getAttachmentId(), e);
+            throw new AppException(ErrorCode.ATTACHMENT_STORAGE_ERROR, "Failed to confirm upload", e);
         }
     }
 
     @Override
     @Transactional(readOnly = true)
-    public ImageUrlResponse getImageUrl(String imageId, Integer expirySeconds) {
-        Image record = findConfirmedImage(imageId);
+    public AttachmentUrlResponse getAttachmentUrl(String attachmentId, Integer expirySeconds) {
+        Attachment record = findConfirmedAttachment(attachmentId);
 
         int expiry = (expirySeconds != null && expirySeconds > 0)
                 ? expirySeconds
                 : downloadUrlExpiryHours * 3600;
 
-        String url = imageUrlService.generatePresignedGetUrl(
+        String url = attachmentUrlService.generatePresignedGetUrl(
                 record.getBucketName(), record.getObjectName(), expiry
         );
-        long expiresAt = imageUrlService.calculateExpiryTimestampSeconds(expiry);
+        long expiresAt = attachmentUrlService.calculateExpiryTimestampSeconds(expiry);
 
-        return imageMapper.toUrlResponse(imageId, url, expiresAt);
+        return attachmentMapper.toUrlResponse(attachmentId, url, expiresAt);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public ImageMetadata getImageMetadata(String imageId) {
-        Image record = findConfirmedImage(imageId);
-        return imageMapper.toMetadata(record);
+    public AttachmentMetadata getAttachmentMetadata(String attachmentId) {
+        Attachment record = findConfirmedAttachment(attachmentId);
+        return attachmentMapper.toMetadata(record);
     }
 
     @Override
     @Transactional
-    public void deleteImage(String imageId) {
-        Image record = findImageById(imageId);
+    public void deleteAttachment(String attachmentId) {
+        Attachment record = findAttachmentById(attachmentId);
 
         try {
             deleteFromMinio(record.getBucketName(), record.getObjectName());
 
-            record.setStatus(Image.ImageStatus.DELETED);
-            imageRepository.save(record);
+            record.setStatus(Attachment.AttachmentStatus.DELETED);
+            attachmentRepository.save(record);
 
-            log.info("Image deleted: {}", imageId);
+            log.info("Attachment deleted: {}", attachmentId);
 
         } catch (Exception e) {
-            log.error("Failed to delete image: {}", imageId, e);
-            throw new AppException(ErrorCode.IMAGE_STORAGE_ERROR, "Failed to delete image", e);
+            log.error("Failed to delete attachment: {}", attachmentId, e);
+            throw new AppException(ErrorCode.ATTACHMENT_STORAGE_ERROR, "Failed to delete attachment", e);
         }
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<ImageMetadata> listImagesByCategory(String category) {
-        List<Image> records = (category != null)
-                ? imageRepository.findByCategoryAndStatus(category, Image.ImageStatus.CONFIRMED)
-                : imageRepository.findByStatus(Image.ImageStatus.CONFIRMED);
+    public List<AttachmentMetadata> listAttachmentsByCategory(String category) {
+        List<Attachment> records = (category != null)
+                ? attachmentRepository.findByCategoryAndStatus(category, Attachment.AttachmentStatus.CONFIRMED)
+                : attachmentRepository.findByStatus(Attachment.AttachmentStatus.CONFIRMED);
 
-        return imageMapper.toMetadataList(records);
+        return attachmentMapper.toMetadataList(records);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public InputStream downloadImage(String imageId) {
-        Image record = findConfirmedImage(imageId);
+    public InputStream downloadAttachment(String attachmentId) {
+        Attachment record = findConfirmedAttachment(attachmentId);
 
         try {
             return minioClient.getObject(
@@ -185,14 +185,14 @@ public class ImageServiceImpl implements ImageService {
                             .build()
             );
         } catch (Exception e) {
-            log.error("Failed to download image: {}", imageId, e);
-            throw new AppException(ErrorCode.IMAGE_STORAGE_ERROR, "Failed to download image", e);
+            log.error("Failed to download attachment: {}", attachmentId, e);
+            throw new AppException(ErrorCode.ATTACHMENT_STORAGE_ERROR, "Failed to download attachment", e);
         }
     }
 
     private void validateUploadRequest(PresignedUploadRequest request) {
         if (request.getFileSize() > maxFileSize) {
-            throw new AppException(ErrorCode.IMAGE_STORAGE_ERROR, String.format(
+            throw new AppException(ErrorCode.ATTACHMENT_STORAGE_ERROR, String.format(
                     "File size %d bytes exceeds maximum %d bytes",
                     request.getFileSize(), maxFileSize
             ));
@@ -200,27 +200,27 @@ public class ImageServiceImpl implements ImageService {
 
         String contentType = request.getContentType().toLowerCase();
         if (!allowedContentTypes.contains(contentType)) {
-            throw new AppException(ErrorCode.IMAGE_STORAGE_ERROR, String.format(
+            throw new AppException(ErrorCode.ATTACHMENT_STORAGE_ERROR, String.format(
                     "Content type '%s' is not allowed. Allowed: %s",
                     contentType, allowedContentTypes
             ));
         }
     }
 
-    private ConfirmUploadResponse buildConfirmResponse(Image record) {
-        String imageUrl = imageUrlService.generatePresignedGetUrlSafely(
+    private ConfirmUploadResponse buildConfirmResponse(Attachment record) {
+        String attachmentUrl = attachmentUrlService.generatePresignedGetUrlSafely(
                 record.getBucketName(),
                 record.getObjectName(),
                 null
         );
 
-        return imageMapper.toConfirmResponse(
+        return attachmentMapper.toConfirmResponse(
                 record,
-                imageUrl
+                attachmentUrl
         );
     }
 
-    private String generateImageId() {
+    private String generateAttachmentId() {
         return UUID.randomUUID().toString().replace("-", "");
     }
 
@@ -231,7 +231,7 @@ public class ImageServiceImpl implements ImageService {
         return fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
     }
 
-    private String buildObjectName(String imageId, String category, String extension) {
+    private String buildObjectName(String attachmentId, String category, String extension) {
         StringBuilder sb = new StringBuilder();
 
         if (category != null && !category.isBlank()) {
@@ -239,22 +239,22 @@ public class ImageServiceImpl implements ImageService {
         }
 
         sb.append(LocalDate.now()).append("/");
-        sb.append(imageId).append(".").append(extension);
+        sb.append(attachmentId).append(".").append(extension);
 
         return sb.toString();
     }
 
-    private Image findImageById(String imageId) {
-        return imageRepository.findById(imageId)
-                .orElseThrow(() -> new AppException(ErrorCode.IMAGE_NOT_FOUND, "Image not found: " + imageId));
+    private Attachment findAttachmentById(String attachmentId) {
+        return attachmentRepository.findById(attachmentId)
+                .orElseThrow(() -> new AppException(ErrorCode.ATTACHMENT_NOT_FOUND, "Attachment not found: " + attachmentId));
     }
 
-    private Image findConfirmedImage(String imageId) {
-        return imageRepository.findByIdAndStatus(imageId, Image.ImageStatus.CONFIRMED)
-                .orElseThrow(() -> new AppException(ErrorCode.IMAGE_NOT_FOUND, "Confirmed image not found: " + imageId));
+    private Attachment findConfirmedAttachment(String attachmentId) {
+        return attachmentRepository.findByIdAndStatus(attachmentId, Attachment.AttachmentStatus.CONFIRMED)
+                .orElseThrow(() -> new AppException(ErrorCode.ATTACHMENT_NOT_FOUND, "Confirmed attachment not found: " + attachmentId));
     }
 
-    private StatObjectResponse verifyObjectExistsInMinio(Image record) throws Exception {
+    private StatObjectResponse verifyObjectExistsInMinio(Attachment record) throws Exception {
         return minioClient.statObject(
                 StatObjectArgs.builder()
                         .bucket(record.getBucketName())

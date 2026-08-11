@@ -17,7 +17,7 @@ public interface UserMapper {
     @Mapping(target = "email", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "imageId", ignore = true)
-    @Mapping(target = "bannerImageId", ignore = true)
+    @Mapping(target = "avatar", ignore = true)
+    @Mapping(target = "banner", ignore = true)
     void updateFromRequest(UserUpdateRequest request, @MappingTarget User user);
 }

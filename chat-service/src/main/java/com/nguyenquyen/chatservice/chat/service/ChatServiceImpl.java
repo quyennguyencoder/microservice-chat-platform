@@ -73,7 +73,7 @@ public class ChatServiceImpl implements ChatService {
         Chat chat = Chat.builder()
                 .type(ChatType.GROUP)
                 .name(request.name())
-                .imageId(request.imageId())
+                .attachmentId(request.attachmentId())
                 .ownerId(currentUserId)
                 .build();
 
@@ -136,8 +136,12 @@ public class ChatServiceImpl implements ChatService {
         if (request.name() != null) {
             chat.setName(request.name());
         }
-        if (request.imageId() != null) {
-            chat.setImageId(request.imageId());
+        if (request.attachmentId() != null) {
+            if (request.attachmentId().isEmpty()) {
+                chat.setAttachmentId(null);
+            } else {
+                chat.setAttachmentId(request.attachmentId());
+            }
         }
 
         chat = chatRepository.save(chat);

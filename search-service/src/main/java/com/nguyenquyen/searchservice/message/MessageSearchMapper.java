@@ -1,6 +1,7 @@
 package com.nguyenquyen.searchservice.message;
 
 import org.springframework.stereotype.Component;
+import java.time.Instant;
 
 @Component
 public class MessageSearchMapper {
@@ -16,7 +17,8 @@ public class MessageSearchMapper {
                 .senderId(document.getSenderId())
                 .content(document.getContent())
                 .type(document.getType())
-                .createdAt(document.getCreatedAt())
+                .createdAt(document.getCreatedAt() != null ? Instant.ofEpochMilli(document.getCreatedAt()) : null)
+                .updatedAt(document.getUpdatedAt() != null ? Instant.ofEpochMilli(document.getUpdatedAt()) : null)
                 .build();
     }
 }

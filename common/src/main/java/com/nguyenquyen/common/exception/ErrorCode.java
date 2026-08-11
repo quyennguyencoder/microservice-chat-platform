@@ -26,8 +26,8 @@ public enum ErrorCode {
     INDEXING_ERROR(3001, "Failed to index data", HttpStatus.INTERNAL_SERVER_ERROR),
     SEARCH_ERROR(3002, "Search operation failed", HttpStatus.INTERNAL_SERVER_ERROR),
     // Storage
-    IMAGE_NOT_FOUND(4001, "Image not found", HttpStatus.NOT_FOUND),
-    IMAGE_STORAGE_ERROR(4002, "Image storage error", HttpStatus.INTERNAL_SERVER_ERROR);
+    ATTACHMENT_NOT_FOUND(4001, "Image not found", HttpStatus.NOT_FOUND),
+    ATTACHMENT_STORAGE_ERROR(4002, "Image storage error", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final int code;
     private final String message;

@@ -23,12 +23,12 @@ public class    UserEvent implements BaseEvent {
     private String email;
     private String displayName;
     private String description;
-    private String imageId;
-    private String bannerImageId;
+    private String avatar;
+    private String banner;
 
     // Notification preview
     private String previewText;
-    private String previewImageId;
+    private String previewAttachmentId;
 
     @Builder.Default
     private Instant timestamp = Instant.now();

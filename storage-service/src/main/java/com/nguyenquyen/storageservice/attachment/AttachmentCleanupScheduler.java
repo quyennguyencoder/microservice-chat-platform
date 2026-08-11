@@ -1,4 +1,4 @@
-package com.nguyenquyen.storageservice.image;
+package com.nguyenquyen.storageservice.attachment;
 
 import io.minio.MinioClient;
 import io.minio.RemoveObjectsArgs;
@@ -23,26 +23,26 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 @ConditionalOnProperty(
-        name = "image-storage.cleanup.enabled",
+        name = "attachment-storage.cleanup.enabled",
         havingValue = "true",
         matchIfMissing = true
 )
-public class ImageCleanupScheduler {
+public class AttachmentCleanupScheduler {
 
-    private final ImageRepository imageRepository;
+    private final AttachmentRepository attachmentRepository;
     private final MinioClient minioClient;
 
-    @Value("${image-storage.cleanup.pending-expiry-hours:2}")
+    @Value("${attachment-storage.cleanup.pending-expiry-hours:2}")
     private int pendingExpiryHours;
 
-    @Scheduled(fixedDelayString = "${image-storage.cleanup.interval-ms:3600000}")
+    @Scheduled(fixedDelayString = "${attachment-storage.cleanup.interval-ms:3600000}")
     @Transactional
     public void cleanupExpiredPendingUploads() {
         Instant threshold = Instant.now().minus(pendingExpiryHours, ChronoUnit.HOURS);
 
         // Fetch up to 1000 records at a time to prevent OOM
-        List<Image> expiredRecords = imageRepository
-                .findExpiredPendingUploads(Image.ImageStatus.PENDING, threshold, PageRequest.of(0, 1000));
+        List<Attachment> expiredRecords = attachmentRepository
+                .findExpiredPendingUploads(Attachment.AttachmentStatus.PENDING, threshold, PageRequest.of(0, 1000));
 
         if (expiredRecords.isEmpty()) {
             log.debug("No expired pending uploads found");
@@ -71,11 +71,11 @@ public class ImageCleanupScheduler {
             log.error("Failed to bulk remove objects from bucket {}", bucket, e);
         }
 
-        for (Image record : expiredRecords) {
-            record.setStatus(Image.ImageStatus.EXPIRED);
+        for (Attachment record : expiredRecords) {
+            record.setStatus(Attachment.AttachmentStatus.EXPIRED);
         }
 
-        imageRepository.saveAll(expiredRecords);
+        attachmentRepository.saveAll(expiredRecords);
         log.info("Cleanup completed for batch of {}", expiredRecords.size());
     }
 }

@@ -1,4 +1,4 @@
-package com.nguyenquyen.storageservice.image;
+package com.nguyenquyen.storageservice.attachment;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ConfirmUploadRequest {
 
-    @NotBlank(message = "Image ID is required")
-    private String imageId;
+    @NotBlank(message = "Attachment ID is required")
+    private String attachmentId;
     private String fileName;
     private String contentType;
     private Long fileSize;

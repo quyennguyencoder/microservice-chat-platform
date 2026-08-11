@@ -5,8 +5,8 @@ public record UserResponse(
      String username,
      String email,
      String displayName,
-     String imageId,
-     String bannerImageId,
+     String avatar,
+     String banner,
      String description
 ) {
 }

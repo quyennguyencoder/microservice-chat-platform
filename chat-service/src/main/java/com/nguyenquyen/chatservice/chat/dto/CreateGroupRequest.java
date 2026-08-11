@@ -11,7 +11,7 @@ public record CreateGroupRequest(
         @Size(max = 100, message = "Group name must not exceed 100 characters")
         String name,
 
-        String imageId,
+        String attachmentId,
 
         @NotEmpty(message = "At least one member is required")
         List<String> memberIds

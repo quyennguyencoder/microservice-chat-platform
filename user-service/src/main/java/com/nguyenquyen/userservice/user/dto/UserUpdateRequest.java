@@ -14,9 +14,9 @@ public record UserUpdateRequest(
         String description,
 
         @Size(max = 100)
-        String imageId,
+        String avatar,
 
         @Size(max = 100)
-        String bannerImageId
+        String banner
 ) {
 }

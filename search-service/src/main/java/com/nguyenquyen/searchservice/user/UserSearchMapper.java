@@ -3,6 +3,7 @@ package com.nguyenquyen.searchservice.user;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,10 +22,11 @@ public class UserSearchMapper {
                 .id(doc.getId())
                 .username(doc.getUsername())
                 .description(doc.getDescription())
-                .imageId(doc.getImageId())
-                .bannerImageId(doc.getBannerImageId())
+                .avatar(doc.getAvatar())
+                .banner(doc.getBanner())
 
-                .createdAt(doc.getCreatedAt())
+                .createdAt(doc.getCreatedAt() != null ? Instant.ofEpochMilli(doc.getCreatedAt()) : null)
+                .updatedAt(doc.getUpdatedAt() != null ? Instant.ofEpochMilli(doc.getUpdatedAt()) : null)
                 .build();
     }
 

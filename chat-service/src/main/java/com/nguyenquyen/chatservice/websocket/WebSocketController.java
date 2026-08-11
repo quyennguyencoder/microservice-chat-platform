@@ -71,7 +71,7 @@ public class WebSocketController {
                 userId,
                 incoming.getContent(),
                 type,
-                incoming.getImageId()
+                incoming.getAttachmentId()
         );
 
         log.info("Message saved: id={}, chatId={}, from={}",

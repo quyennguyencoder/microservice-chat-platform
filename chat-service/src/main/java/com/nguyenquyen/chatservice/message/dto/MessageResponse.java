@@ -13,6 +13,6 @@ public record MessageResponse(
         String content,
         MessageType type,
         MessageState state,
-        String imageId,
+        String attachmentId,
         Instant createdAt
 ) {}

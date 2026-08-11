@@ -6,7 +6,7 @@ public record FriendshipResponse(
         String userId,
         String username,
         String displayName,
-        String imageId,
+        String avatar,
         String status,
         Instant since
 ) {}

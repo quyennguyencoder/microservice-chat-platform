@@ -75,7 +75,7 @@ public class UserSearchServiceImpl implements UserSearchService {
 
             UserDocument existing = existingOpt.get();
             updateDocumentFromEvent(existing, event);
-            existing.setUpdatedAt(Instant.now());
+            existing.setUpdatedAt(Instant.now().toEpochMilli());
 
             elasticsearchClient.index(i -> i
                     .index(usersIndex)
@@ -137,10 +137,10 @@ public class UserSearchServiceImpl implements UserSearchService {
                 .username(event.getUsername())
                 .email(event.getEmail())
                 .description(event.getDescription())
-                .imageId(event.getImageId())
-                .bannerImageId(event.getBannerImageId())
-                .createdAt(event.getTimestamp())
-                .updatedAt(Instant.now())
+                .avatar(event.getAvatar())
+                .banner(event.getBanner())
+                .createdAt(event.getTimestamp() != null ? event.getTimestamp().toEpochMilli() : Instant.now().toEpochMilli())
+                .updatedAt(Instant.now().toEpochMilli())
                 .build();
     }
 
@@ -151,11 +151,11 @@ public class UserSearchServiceImpl implements UserSearchService {
         if (event.getDescription() != null) {
             document.setDescription(event.getDescription());
         }
-        if (event.getImageId() != null) {
-            document.setImageId(event.getImageId());
+        if (event.getAvatar() != null) {
+            document.setAvatar(event.getAvatar());
         }
-        if (event.getBannerImageId() != null) {
-            document.setBannerImageId(event.getBannerImageId());
+        if (event.getBanner() != null) {
+            document.setBanner(event.getBanner());
         }
     }
 
