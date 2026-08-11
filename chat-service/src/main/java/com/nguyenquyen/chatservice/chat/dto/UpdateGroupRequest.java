@@ -6,5 +6,5 @@ public record UpdateGroupRequest(
         @Size(max = 100, message = "Group name must not exceed 100 characters")
         String name,
 
-        String imageId
+        String attachmentId
 ) {}
