@@ -122,11 +122,11 @@ spring:
                 name: gatewayCB
                 fallbackUri: forward:/fallback/general
 
-        - id: storage-service-swagger
-          uri: lb://STORAGE-SERVICE
+        # ==================== Moderation Service Routes ====================
+        - id: moderation-service-route
+          uri: ${MODERATION_SERVICE_URI:http://localhost:8060}
           predicates:
-            - Path=/storage-service/**
-
+            - Path=/api/v1/moderation/**
 
 
       httpclient:

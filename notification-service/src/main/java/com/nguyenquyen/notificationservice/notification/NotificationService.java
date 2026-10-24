@@ -22,4 +22,6 @@ public interface NotificationService {
     int markAsRead(List<UUID> ids);
 
     void delete(UUID id);
+
+    void sendModerationWarning(String userId, String label, UUID messageId);
 }

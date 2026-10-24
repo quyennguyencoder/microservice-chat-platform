@@ -162,6 +162,26 @@ services:
       - prometheus
     restart: unless-stopped
 
+  # ==================== ML CONTENT MODERATION SERVICE ====================
+  moderation-service:
+    build:
+      context: ./moderation-service
+      dockerfile: Dockerfile
+    container_name: moderation-service
+    ports:
+      - "8060:8060"
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - KAFKA_TOPIC_CHAT_EVENTS=chat-events
+      - KAFKA_TOPIC_MODERATION_EVENTS=moderation-events
+      - MODEL_PATH=/app/model
+      - CONFIDENCE_THRESHOLD_OFFENSIVE=0.75
+      - CONFIDENCE_THRESHOLD_HATE=0.60
+    volumes:
+      - ./moderation-service/model:/app/model
+    depends_on:
+      - kafka
+    restart: unless-stopped
 
 volumes:
   postgres-data:

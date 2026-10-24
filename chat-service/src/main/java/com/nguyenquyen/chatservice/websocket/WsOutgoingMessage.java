@@ -88,6 +88,15 @@ public class WsOutgoingMessage {
                 .build();
     }
 
+    public static WsOutgoingMessage messageFlagged(UUID chatId, MessageResponse message, Object payload) {
+        return WsOutgoingMessage.builder()
+                .type(WsMessageType.MESSAGE_FLAGGED)
+                .chatId(chatId)
+                .message(message)
+                .payload(payload)
+                .build();
+    }
+
     public static WsOutgoingMessage error(String errorMessage) {
         return WsOutgoingMessage.builder()
                 .type(WsMessageType.ERROR)
