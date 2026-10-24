@@ -45,3 +45,22 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Python & Moderation Service ###
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+### ML Model Weights & Heavy Files (>100MB) ###
+moderation-service/model/*.safetensors
+moderation-service/model/*.bin
+moderation-service/model/*.pt
+*.zip
+*.tar.gz
+
+### Training Dataset & Temp Files ###
+moderation-service/vihsd/
+moderation-service/test.txt
+docs/tmp/
+
