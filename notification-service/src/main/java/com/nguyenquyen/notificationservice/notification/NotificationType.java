@@ -9,5 +9,8 @@ public enum NotificationType {
 
     // User notifications
     FRIEND_REQUEST,
-    FRIEND_ACCEPTED
+    FRIEND_ACCEPTED,
+
+    // Moderation notifications
+    MODERATION_WARNING
 }

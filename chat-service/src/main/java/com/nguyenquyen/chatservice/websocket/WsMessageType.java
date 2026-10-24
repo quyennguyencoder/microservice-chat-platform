@@ -19,5 +19,6 @@ public enum WsMessageType {
     USER_OFFLINE,
     GROUP_UPDATED,
     MEMBER_CHANGE,
+    MESSAGE_FLAGGED,
     ERROR
 }

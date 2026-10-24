@@ -240,4 +240,34 @@ public class NotificationServiceImpl implements NotificationService {
             default -> throw new IllegalArgumentException("Unknown event type: " + event.getType());
         };
     }
+
+    @Override
+    public void sendModerationWarning(String userId, String label, UUID messageId) {
+        String warningText = "HATE".equalsIgnoreCase(label)
+                ? "Tin nhắn của bạn chứa nội dung thù ghét/độc hại và đã bị ẩn."
+                : "Tin nhắn của bạn bị đánh dấu không phù hợp (xúc phạm) theo quy tắc cộng đồng.";
+
+        Set<String> systemActor = new HashSet<>();
+        systemActor.add("SYSTEM");
+
+        Notification notification = Notification.builder()
+                .recipientId(userId)
+                .actorId("SYSTEM")
+                .type(NotificationType.MODERATION_WARNING)
+                .previewText(warningText)
+                .referenceId(messageId)
+                .aggregatedCount(1)
+                .uniqueActorCount(1)
+                .allActorIds(systemActor)
+                .status(NotificationStatus.UNREAD)
+                .build();
+
+        Notification saved = notificationRepository.save(notification);
+        unreadCounterService.increment(userId);
+
+        NotificationResponse response = notificationMapper.toResponse(saved);
+        sseEmitterManager.sendToUser(userId, SseEvent.notification(response));
+
+        log.info("Sent moderation warning to user {} for message {} (label: {})", userId, messageId, label);
+    }
 }
